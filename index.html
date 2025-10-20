@@ -686,6 +686,7 @@
                     <th>Cidade</th>
                     <th class="text-end"><strong>Pré</strong></th>
                     <th class="text-end"><strong>Pós</strong></th>
+                    <th class="text-end"><strong>QOE 24h</strong></th>
                     <th class="text-end">Variação</th>
                     <th>Status</th>
                   </tr>
@@ -798,6 +799,9 @@ const AUTO_MAP={
   'QOE PÓS':'QOE_Pos',
   'QOE POS':'QOE_Pos',
   'QOE_POS':'QOE_Pos',
+  'QOE 24H':'QOE_24h',
+  'QOE_24H':'QOE_24h',
+  'QOE24H':'QOE_24h',
   'SOLUÇÃO':'Tipo_Fechamento',
   'SOLUCAO':'Tipo_Fechamento',
   'TIPO_FECHAMENTO':'Tipo_Fechamento'
@@ -964,6 +968,9 @@ function handleFile(file){
         o['QOE_Pos']=Number(String(o['QOE_Pos']||'0').toString().replace(',','.')); 
         if(!isFinite(o['QOE_Pos'])) o['QOE_Pos']=0;
         
+        o['QOE_24h']=Number(String(o['QOE_24h']||'0').toString().replace(',','.')); 
+        if(!isFinite(o['QOE_24h'])) o['QOE_24h']=0;
+        
         // Mapear campos de texto
         ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
           o[k]=String(o[k]||'').trim();
@@ -993,36 +1000,67 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-/* ================= QOE ================= */
+/* ================= QOE - MODIFICADA COM QOE 24h ================= */
 function colorByValue(v){
   if(!isFinite(v)) return '';
   if(v <= 40) return 'text-danger fw-bold';
   if(v <= 80) return 'text-warning fw-bold';
   return 'text-success fw-bold';
 }
+
+function calcularVariacaoStatus(qpre, qpos, q24h) {
+  if (!isFinite(qpre) || !isFinite(qpos) || !isFinite(q24h)) return '—';
+  
+  // Lógica de prioridade para determinar a variação
+  if (qpos >= 80) {
+    return '<span class="status-badge badge-success">Excelente</span>';
+  } else if (qpos >= 60 && q24h >= 60) {
+    return '<span class="status-badge badge-success">Estável</span>';
+  } else if (qpos > qpre && q24h > qpre) {
+    return '<span class="status-badge badge-success">Melhorando</span>';
+  } else if (qpos < qpre && q24h < qpre) {
+    return '<span class="status-badge badge-danger">Piorando</span>';
+  } else if (q24h <= 40) {
+    return '<span class="status-badge badge-danger">Crítico</span>';
+  } else if (q24h <= 60) {
+    return '<span class="status-badge badge-warning">Atenção</span>';
+  } else {
+    return '<span class="status-badge badge-warning">Instável</span>';
+  }
+}
+
 function aggregateQoe(rows,keys){
   const map=new Map();
   rows.forEach(r=>{
     const k=keys.map(k=>r[k]||'').join('||');
-    const acc=map.get(k)||{cnt:0,qpre:0,qpos:0,Node:r.Node||'',Cluster:r.Cluster||'',Cidade:r.Cidade||''};
-    acc.cnt++; acc.qpre+=isFinite(r.QOE_Pre)?r.QOE_Pre:0; acc.qpos+=isFinite(r.QOE_Pos)?r.QOE_Pos:0;
+    const acc=map.get(k)||{cnt:0,qpre:0,qpos:0,q24h:0,Node:r.Node||'',Cluster:r.Cluster||'',Cidade:r.Cidade||''};
+    acc.cnt++; 
+    acc.qpre+=isFinite(r.QOE_Pre)?r.QOE_Pre:0; 
+    acc.qpos+=isFinite(r.QOE_Pos)?r.QOE_Pos:0;
+    acc.q24h+=isFinite(r.QOE_24h)?r.QOE_24h:0;
     map.set(k,acc);
   });
   return Array.from(map.values()).map(v=>{
     const pre=v.cnt?v.qpre/v.cnt:0;
     const pos=v.cnt?v.qpos/v.cnt:0;
-    return {...v,qoePre:pre,qoePos:pos,varPct:safeVarPct(pre,pos)};
+    const q24h=v.cnt?v.q24h/v.cnt:0;
+    return {...v,qoePre:pre,qoePos:pos,qoe24h:q24h,varPct:safeVarPct(pre,pos)};
   });
 }
+
 function renderQoe(){
   const arr=aggregateQoe(RAW,['Node','Cluster','Cidade']);
   $('#tblQoeNode tbody').innerHTML = arr.map(r=>{
     const arrow=r.varPct>1?'<span class="text-success fw-bold"><i class="bi bi-arrow-up"></i></span>':'<span class="text-danger fw-bold"><i class="bi bi-arrow-down"></i></span>';
-    const status=r.varPct>1?'<span class="status-badge badge-success">Melhoria</span>':'<span class="status-badge badge-danger">Piora/Estável</span>';
+    const status = calcularVariacaoStatus(r.qoePre, r.qoePos, r.qoe24h);
+    
     return `<tr class="slide-in-up">
-      <td>${r.Node}</td><td>${r.Cluster}</td><td>${r.Cidade}</td>
+      <td>${r.Node}</td>
+      <td>${r.Cluster}</td>
+      <td>${r.Cidade}</td>
       <td class="text-end ${colorByValue(r.qoePre)}">${fmtNum(r.qoePre)}</td>
       <td class="text-end ${colorByValue(r.qoePos)}">${fmtNum(r.qoePos)}</td>
+      <td class="text-end ${colorByValue(r.qoe24h)}">${fmtNum(r.qoe24h)}</td>
       <td class="text-end">${arrow} ${fmtPct(r.varPct)}</td>
       <td>${status}</td>
     </tr>`;
