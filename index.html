@@ -1,5 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Portal de Análise de Incidentes</title>
+
+  <!-- CSS & Libs -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/vfs_fonts.js"></script>
+
+  <style>
+    :root {
+      --primary: #2e7d32;
+      --primary-dark: #1b5e20;
+      --primary-light: #4caf50;
+      --secondary: #a5d6a7;
+      --accent: #81c784;
+      --light-bg: linear-gradient(135deg, #f8fdf8 0%, #f0f7ff 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-bg-hover: rgba(255, 255, 255, 0.98);
+      --text-dark: #1a1a1a;
+      --text-muted: #5a5a5a;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --info: #2196f3;
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.15);
+      --glass: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .app-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      opacity: 0.1;
+    }
+    
+    .brand-dot {
+      width: .75rem;
+      height: .75rem;
+      border-radius: 50%;
+      background: #fff;
+      display: inline-block;
+      margin-right: .5rem;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    
+    .sidebar {
+      min-height: 100vh;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+    }
+    
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(46, 125, 50, 0.03) 0%, rgba(33, 150, 243, 0.03) 100%);
+      z-index: -1;
+    }
+    
+    .sidebar .nav-link {
+      border-radius: 12px;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 12px 16px;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sidebar .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.6s;
+    }
+    
+    .sidebar .nav-link:hover {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%);
+      color: var(--primary);
+      transform: translateX(5px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .sidebar .nav-link:hover::before {
+      left: 100%;
+    }
+    
+    .sidebar .nav-link.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+      transform: translateX(0);
+    }
+    
+    .upload-drop {
+      border: 2px dashed var(--accent);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload-drop::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .upload-drop:hover, .upload-drop.dragover {
+      background: var(--glass);
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .upload-drop:hover::before, .upload-drop.dragover::before {
+      opacity: 1;
+    }
+    
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: .5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .chart-wrap {
+      position: relative;
+      height: 380px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: chartEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes chartEntrance {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .chart-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.02) 0%, rgba(33, 150, 243, 0.02) 100%);
+      z-index: -1;
+    }
+    
+    .card-custom {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes cardEntrance {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card-custom:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-lg);
+      background: var(--card-bg-hover);
+    }
+    
+    .card-custom::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--info));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    
+    .card-custom:hover::before {
+      transform: scaleX(1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+      border-radius: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .text-success {
+      color: var(--success) !important;
+    }
+    
+    .text-warning {
+      color: var(--warning) !important;
+    }
+    
+    .text-danger {
+      color: var(--danger) !important;
+    }
+    
+    .fw-bold {
+      font-weight: 700 !important;
+    }
+    
+    .pointer {
+      cursor: pointer;
+    }
+    
+    .details-row td {
+      border-top: none;
+      font-size: .9rem;
+    }
+    
+    .section-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+      position: relative;
+      font-size: 1.25rem;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--info));
+      border-radius: 2px;
+    }
+    
+    .table-hover tbody tr:hover {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
+      transform: translateX(5px);
+      transition: all 0.3s ease;
+    }
+    
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .badge-success {
+      background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
+      color: white;
+    }
+    
+    .badge-warning {
+      background: linear-gradient(135deg, var(--warning) 0%, #ffb74d 100%);
+      color: white;
+    }
+    
+    .badge-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      color: white;
+    }
+    
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .spinner-border-sm {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .cluster-row {
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 8px;
+    }
+    
+    .cluster-row:hover {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%) !important;
+      transform: translateX(5px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .cluster-row.selected {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(33, 150, 243, 0.15) 100%) !important;
+      font-weight: 600;
+      border-left: 4px solid var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .back-button {
+      margin-bottom: 15px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 0.3s forwards;
+    }
+    
+    /* Estilos para o log de reincidência expansível */
+    .details-content {
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      background: linear-gradient(135deg, rgba(248, 249, 250, 0.8) 0%, rgba(233, 236, 239, 0.6) 100%);
+    }
+    
+    .table-active {
+      background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%) !important;
+      font-weight: 600;
+    }
+    
+    .expand-icon {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .details-row {
+      background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(233, 236, 239, 0.7) 100%);
+      backdrop-filter: blur(10px);
+    }
+    
+    .details-row .card {
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .details-row .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .badge.rounded-pill {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      font-weight: 600;
+    }
+    
+    /* Animações refinadas */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    .slide-in-up {
+      animation: slideInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .scale-in {
+      animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Efeitos de entrada sequenciais para as abas */
+    .tab-pane {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .tab-pane .row > * {
+      opacity: 0;
+      animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .tab-pane .row > *:nth-child(1) { animation-delay: 0.1s; }
+    .tab-pane .row > *:nth-child(2) { animation-delay: 0.2s; }
+    .tab-pane .row > *:nth-child(3) { animation-delay: 0.3s; }
+    .tab-pane .row > *:nth-child(4) { animation-delay: 0.4s; }
+    
+    /* Paleta de cores para gráficos */
+    .chart-color-1 { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
+    .chart-color-2 { background: linear-gradient(135deg, #4ECDC4, #6CE5E5); }
+    .chart-color-3 { background: linear-gradient(135deg, #45B7D1, #67D4FF); }
+    .chart-color-4 { background: linear-gradient(135deg, #96CEB4, #B4E8C9); }
+    .chart-color-5 { background: linear-gradient(135deg, #F9D276, #FFE4A1); }
+    .chart-color-6 { background: linear-gradient(135deg, #FFCC5C, #FFDD8E); }
+    .chart-color-7 { background: linear-gradient(135deg, #FF6F69, #FF9C96); }
+    .chart-color-8 { background: linear-gradient(135deg, #88D8B0, #A8E8C5); }
+    .chart-color-9 { background: linear-gradient(135deg, #B5EAD7, #D1F4E6); }
+    .chart-color-10 { background: linear-gradient(135deg, #C7CEEA, #DDE2F5); }
+    
+    /* Ajustes responsivos */
+    @media (max-width: 768px) {
+      .sidebar {
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .chart-wrap {
+        height: 300px;
+      }
+      
+      .card-custom:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<header class="app-header py-3">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Análise de Incidentes</h1>
+    <div class="d-flex gap-2">
+      <!-- Upload removido do header -->
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- ===== SIDEBAR ===== -->
+    <nav class="col-12 col-md-3 col-lg-2 sidebar p-4">
+      <div class="upload-drop mb-4" id="dropArea">
+        <i class="bi bi-cloud-arrow-up fs-2 text-primary mb-3"></i>
+        <p class="mb-1 fw-semibold">Arraste e solte sua planilha aqui</p>
+        <span class="small-note text-muted">Suporta XLSX, XLS e CSV</span>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+      </div>
+
+      <hr class="my-4"/>
+      <div class="nav flex-column gap-2" role="tablist">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabCluster" type="button" id="tabClusterBtn">
+          <i class="bi bi-diagram-3 me-2"></i>Incidentes por Cluster
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCidade" type="button" id="tabCidadeBtn">
+          <i class="bi bi-geo-alt me-2"></i>Incidentes por Cidade
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabQOE" type="button">
+          <i class="bi bi-arrow-left-right me-2"></i>QOE Pré vs Pós
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFechamento" type="button">
+          <i class="bi bi-pie-chart me-2"></i>Tipo de Fechamento
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReinc" type="button">
+          <i class="bi bi-clock-history me-2"></i>Reincidência
+        </button>
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabResumo" type="button">
+          <i class="bi bi-speedometer2 me-2"></i>Dashboard
+        </button>
+      </div>
+    </nav>
+
+    <!-- ===== MAIN ===== -->
+    <main class="col-12 col-md-9 col-lg-10 p-4 p-md-5">
+      <div class="tab-content">
+        <!-- INCIDENTES POR CLUSTER -->
+        <section class="tab-pane fade show active" id="tabCluster">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 section-title">Incidentes por Cluster</h5>
+            <button class="btn btn-primary btn-sm" id="btnPDFCluster">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-12 col-lg-5 mb-4">
+              <div class="card-custom p-4 h-100">
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover" id="tblCluster">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Cluster</th>
+                        <th class="text-end">Incidentes</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-7 mb-4">
+              <div class="chart-wrap">
+                <canvas id="chartCluster"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- INCIDENTES POR CIDADE -->
+        <section class="tab-pane fade" id="tabCidade">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <button class="btn btn-outline-secondary btn-sm back-button" id="btnVoltarCluster" style="display: none;">
+                <i class="bi bi-arrow-left me-1"></i> Voltar para Clusters
+              </button>
+              <h5 class="m-0 section-title" id="tituloCidade">Incidentes por Cidade</h5>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnPDFCidade">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-12 col-lg-5 mb-4">
+              <div class="card-custom p-4 h-100">
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover" id="tblCidade">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Cidade</th>
+                        <th class="text-end">Incidentes</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-7 mb-4">
+              <div class="chart-wrap">
+                <canvas id="chartCidade"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- QOE -->
+        <section class="tab-pane fade" id="tabQOE">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 section-title">QOE Pré vs Pós</h5>
+            <button class="btn btn-primary btn-sm" id="btnPDFQOE">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div class="card-custom p-4">
+            <div class="table-responsive">
+              <table class="table table-sm table-hover" id="tblQoeNode">
+                <thead class="table-light">
+                  <tr>
+                    <th>Node</th>
+                    <th>Cluster</th>
+                    <th>Cidade</th>
+                    <th class="text-end"><strong>Pré</strong></th>
+                    <th class="text-end"><strong>Pós</strong></th>
+                    <th class="text-end">Variação</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- FECHAMENTO -->
+        <section class="tab-pane fade" id="tabFechamento">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 section-title">Tipo de Fechamento</h5>
+            <button class="btn btn-primary btn-sm" id="btnPDFFechamento">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-12 col-lg-6 mb-4">
+              <div class="chart-wrap">
+                <canvas id="chartFechamento"></canvas>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 mb-4">
+              <div class="card-custom p-4 h-100">
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover" id="tblFechamento">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Tipo</th>
+                        <th class="text-end">Volume</th>
+                        <th class="text-end">% </th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <div id="legendFechamento" class="mt-4 small"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REINCIDÊNCIA -->
+        <section class="tab-pane fade" id="tabReinc">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 section-title">Log de Reincidência</h5>
+            <button class="btn btn-primary btn-sm" id="btnPDFReinc">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div class="card-custom p-4">
+            <div class="table-responsive">
+              <table class="table table-sm table-hover" id="tblReinc">
+                <thead class="table-light">
+                  <tr>
+                    <th>Node</th>
+                    <th>Cluster</th>
+                    <th>Cidade</th>
+                    <th class="text-center">Ocorrências</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- DASHBOARD -->
+        <section class="tab-pane fade" id="tabResumo">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="m-0 section-title">Dashboard Resumo</h5>
+            <button class="btn btn-primary btn-sm" id="btnPDFResumo">
+              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+            </button>
+          </div>
+          <div id="cardsResumo" class="row g-4"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ================= Helpers / Estado ================= */
+const $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
+const $=(s,c=document)=>c.querySelector(s);
+let DATA_ALL=[], RAW=[], charts={};
+let selectedCluster = null;
+
 /* ================= Mapeamento flexível de cabeçalhos ================= */
-// ATUALIZADO: Adicionando a nova coluna QOE Pós 24h
+// ATUALIZADO: Mapeamento correto baseado no arquivo de exemplo
 const AUTO_MAP={
   'INCIDENTE':'INCIDENTE',
   'CIDADE':'Cidade',
@@ -17,36 +798,134 @@ const AUTO_MAP={
   'QOE PÓS':'QOE_Pos',
   'QOE POS':'QOE_Pos',
   'QOE_POS':'QOE_Pos',
-  'QOE PÓS 24H':'QOE_Pos_24h',  // NOVA COLUNA
-  'QOE POS 24H':'QOE_Pos_24h',  // NOVA COLUNA
-  'QOE_POS_24H':'QOE_Pos_24h',  // NOVA COLUNA
   'SOLUÇÃO':'Tipo_Fechamento',
   'SOLUCAO':'Tipo_Fechamento',
   'TIPO_FECHAMENTO':'Tipo_Fechamento'
 };
 
-/* ================= Proteções QOE - ATUALIZADO ================= */
-function safeVarPct(qpre, qpos, qpos24h = null){
-  if(!isFinite(qpre) || qpre <= 0) return 0;
-  
-  // Se temos QOE Pós 24h, calcula a variação considerando as três métricas
-  if (qpos24h !== null && isFinite(qpos24h)) {
-    // Média ponderada ou lógica específica - ajuste conforme necessidade
-    return ((qpos24h - qpre) / qpre) * 100;
-  }
-  
-  // Fallback para cálculo original se não houver QOE Pós 24h
-  return ((qpos - qpre) / qpre) * 100;
+function normalizeHeader(str) {
+  return String(str || '')
+    .trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .toUpperCase()
+    .replace(/\s+/g, ' ');
 }
 
+/* ================= Proteções QOE ================= */
+function safeVarPct(qpre,qpos){
+  if(!isFinite(qpre)||qpre<=0) return 0;
+  return ((qpos - qpre)/qpre)*100;
+}
 function fmtPct(n){
-  if(!isFinite(n) || Math.abs(n) > 1000) return '—';
+  if(!isFinite(n) || Math.abs(n)>1000) return '—';
   return `${n.toFixed(1)}%`;
 }
-
 function fmtNum(n){ return isFinite(n) ? n.toFixed(1) : '—'; }
 
-/* ================= Leitura robusta da planilha - ATUALIZADO ================= */
+/* ================= Validação de Datas ================= */
+function validarData(dataStr) {
+  if (!dataStr || dataStr === '') return null;
+  
+  // Se já é um objeto Date válido
+  if (dataStr instanceof Date && !isNaN(dataStr.getTime())) {
+    return dataStr;
+  }
+  
+  dataStr = String(dataStr).trim();
+  
+  // Tentar parse como Date primeiro
+  let data = new Date(dataStr);
+  if (!isNaN(data.getTime())) return data;
+  
+  // Tentar corrigir formatos com barras (problema: 16/20/2025)
+  if (dataStr.includes('/')) {
+    const partes = dataStr.split(/[/\s:]/);
+    if (partes.length >= 3) {
+      let dia = parseInt(partes[0]);
+      let mes = parseInt(partes[1]) - 1;
+      let ano = parseInt(partes[2]);
+      
+      // Corrigir datas com formato inválido (mês > 12)
+      if (mes > 11) {
+        // Trocar dia e mês
+        [dia, mes] = [mes + 1, dia - 1];
+      }
+      
+      // Tentar criar data com os valores corrigidos
+      data = new Date(ano, mes, dia);
+      if (!isNaN(data.getTime())) return data;
+    }
+  }
+  
+  // Tentar formato ISO
+  data = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'));
+  if (!isNaN(data.getTime())) return data;
+  
+  console.warn('Data inválida encontrada:', dataStr);
+  return null;
+}
+
+/* ================= Função Auxiliar para Formatar Data ================= */
+function formatarData(data) {
+  if (!data || !(data instanceof Date) || isNaN(data.getTime())) {
+    return '(sem data)';
+  }
+  
+  try {
+    return data.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error('Erro ao formatar data:', error, data);
+    return '(erro na data)';
+  }
+}
+
+/* ================= Upload ================= */
+const dropArea=$('#dropArea');
+const fileInput = $('#fileInput');
+
+// Eventos de drag and drop
+['dragenter','dragover'].forEach(evt=>dropArea.addEventListener(evt,e=>{
+  e.preventDefault(); 
+  dropArea.classList.add('dragover');
+}));
+['dragleave','drop'].forEach(evt=>dropArea.addEventListener(evt,e=>{
+  e.preventDefault(); 
+  dropArea.classList.remove('dragover');
+}));
+dropArea.addEventListener('drop',e=>{
+  const f=e.dataTransfer.files?.[0]; 
+  if(f) {
+    showLoading();
+    setTimeout(() => {
+      handleFile(f);
+      hideLoading();
+    }, 500);
+  }
+});
+
+// Adicionar clique na área de upload para abrir o seletor de arquivos
+dropArea.addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change',e=>{
+  const f=e.target.files?.[0]; 
+  if(f) {
+    showLoading();
+    setTimeout(() => {
+      handleFile(f);
+      hideLoading();
+    }, 500);
+  }
+});
+
+/* ================= Leitura robusta da planilha ================= */
 function handleFile(file){
   const reader=new FileReader();
   reader.onload=e=>{
@@ -56,6 +935,7 @@ function handleFile(file){
       const ws=wb.Sheets[wb.SheetNames[0]];
       const json=XLSX.utils.sheet_to_json(ws,{defval:'',header:1});
 
+      // Detecta a linha do cabeçalho (primeira linha não vazia)
       let headerRowIndex = json.findIndex(row => Array.isArray(row) && row.some(cell => String(cell).trim() !== ''));
       if (headerRowIndex === -1) { 
         showToast('❌ Planilha vazia ou inválida', 'danger');
@@ -69,26 +949,20 @@ function handleFile(file){
       console.log('Cabeçalhos originais:', rawHeader);
       console.log('Cabeçalhos mapeados:', mappedHeader);
 
+      // Linhas úteis (descarta vazias)
       const dataRows = json.slice(headerRowIndex+1).filter(r => Array.isArray(r) && r.some(cell => String(cell).trim() !== ''));
 
       const rows = dataRows.map(r => {
         const o={};
         mappedHeader.forEach((h,i)=>o[h]=r[i]);
         
-        // Conversões/limpezas - ATUALIZADO com nova coluna
+        // Conversões/limpezas - CORRIGIDO
         o['Data'] = validarData(String(o['Data'] || ''));
-        
-        // QOE Pré
         o['QOE_Pre']=Number(String(o['QOE_Pre']||'0').toString().replace(',','.')); 
         if(!isFinite(o['QOE_Pre'])) o['QOE_Pre']=0;
         
-        // QOE Pós
         o['QOE_Pos']=Number(String(o['QOE_Pos']||'0').toString().replace(',','.')); 
         if(!isFinite(o['QOE_Pos'])) o['QOE_Pos']=0;
-        
-        // QOE Pós 24h - NOVA COLUNA
-        o['QOE_Pos_24h']=Number(String(o['QOE_Pos_24h']||'0').toString().replace(',','.')); 
-        if(!isFinite(o['QOE_Pos_24h'])) o['QOE_Pos_24h']=0;
         
         // Mapear campos de texto
         ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
@@ -119,87 +993,236 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-/* ================= QOE - ATUALIZADO ================= */
+/* ================= QOE ================= */
 function colorByValue(v){
   if(!isFinite(v)) return '';
   if(v <= 40) return 'text-danger fw-bold';
   if(v <= 80) return 'text-warning fw-bold';
   return 'text-success fw-bold';
 }
-
 function aggregateQoe(rows,keys){
   const map=new Map();
   rows.forEach(r=>{
     const k=keys.map(k=>r[k]||'').join('||');
-    const acc=map.get(k)||{
-      cnt:0,
-      qpre:0,
-      qpos:0,
-      qpos24h:0,  // NOVO
-      Node:r.Node||'',
-      Cluster:r.Cluster||'',
-      Cidade:r.Cidade||''
-    };
-    acc.cnt++; 
-    acc.qpre+=isFinite(r.QOE_Pre)?r.QOE_Pre:0; 
-    acc.qpos+=isFinite(r.QOE_Pos)?r.QOE_Pos:0;
-    acc.qpos24h+=isFinite(r.QOE_Pos_24h)?r.QOE_Pos_24h:0;  // NOVO
+    const acc=map.get(k)||{cnt:0,qpre:0,qpos:0,Node:r.Node||'',Cluster:r.Cluster||'',Cidade:r.Cidade||''};
+    acc.cnt++; acc.qpre+=isFinite(r.QOE_Pre)?r.QOE_Pre:0; acc.qpos+=isFinite(r.QOE_Pos)?r.QOE_Pos:0;
     map.set(k,acc);
   });
-  
   return Array.from(map.values()).map(v=>{
     const pre=v.cnt?v.qpre/v.cnt:0;
     const pos=v.cnt?v.qpos/v.cnt:0;
-    const pos24h=v.cnt?v.qpos24h/v.cnt:0;  // NOVO
-    
-    return {
-      ...v,
-      qoePre:pre,
-      qoePos:pos,
-      qoePos24h:pos24h,  // NOVO
-      varPct:safeVarPct(pre, pos, pos24h)  // ATUALIZADO
-    };
+    return {...v,qoePre:pre,qoePos:pos,varPct:safeVarPct(pre,pos)};
   });
 }
-
 function renderQoe(){
   const arr=aggregateQoe(RAW,['Node','Cluster','Cidade']);
-  
-  // ATUALIZANDO A TABELA PARA MOSTRAR AS TRÊS MÉTRICAS
-  $('#tblQoeNode thead tr').innerHTML = `
-    <th>Node</th>
-    <th>Cluster</th>
-    <th>Cidade</th>
-    <th class="text-end"><strong>Pré</strong></th>
-    <th class="text-end"><strong>Pós</strong></th>
-    <th class="text-end"><strong>Pós 24h</strong></th>  <!-- NOVA COLUNA -->
-    <th class="text-end">Variação</th>
-    <th>Status</th>
-  `;
-  
   $('#tblQoeNode tbody').innerHTML = arr.map(r=>{
-    const arrow = r.varPct > 1 ? 
-      '<span class="text-success fw-bold"><i class="bi bi-arrow-up"></i></span>' : 
-      '<span class="text-danger fw-bold"><i class="bi bi-arrow-down"></i></span>';
-    
-    const status = r.varPct > 1 ? 
-      '<span class="status-badge badge-success">Melhoria</span>' : 
-      '<span class="status-badge badge-danger">Piora/Estável</span>';
-    
+    const arrow=r.varPct>1?'<span class="text-success fw-bold"><i class="bi bi-arrow-up"></i></span>':'<span class="text-danger fw-bold"><i class="bi bi-arrow-down"></i></span>';
+    const status=r.varPct>1?'<span class="status-badge badge-success">Melhoria</span>':'<span class="status-badge badge-danger">Piora/Estável</span>';
     return `<tr class="slide-in-up">
-      <td>${r.Node}</td>
-      <td>${r.Cluster}</td>
-      <td>${r.Cidade}</td>
+      <td>${r.Node}</td><td>${r.Cluster}</td><td>${r.Cidade}</td>
       <td class="text-end ${colorByValue(r.qoePre)}">${fmtNum(r.qoePre)}</td>
       <td class="text-end ${colorByValue(r.qoePos)}">${fmtNum(r.qoePos)}</td>
-      <td class="text-end ${colorByValue(r.qoePos24h)}">${fmtNum(r.qoePos24h)}</td>  <!-- NOVA COLUNA -->
       <td class="text-end">${arrow} ${fmtPct(r.varPct)}</td>
       <td>${status}</td>
     </tr>`;
   }).join('');
 }
 
-/* ================= Reincidência - ATUALIZADO ================= */
+/* ================= Incidentes por Cluster ================= */
+function renderCluster(){
+  const grp={}; RAW.forEach(r=>{grp[r.Cluster]=(grp[r.Cluster]||0)+1});
+  const arr=Object.entries(grp).map(([c,v])=>({c,v})).sort((a,b)=>b.v-a.v);
+  
+  const tbody = $('#tblCluster tbody');
+  tbody.innerHTML = arr.map(({c,v}) => 
+    `<tr class="cluster-row pointer slide-in-up" data-cluster="${c}">
+      <td>${c}</td>
+      <td class="text-end">${v}</td>
+    </tr>`
+  ).join('');
+  
+  // Adicionar event listeners para as linhas
+  const clusterRows = document.querySelectorAll('#tblCluster .cluster-row');
+  clusterRows.forEach(row => {
+    row.addEventListener('click', function() {
+      const cluster = this.getAttribute('data-cluster');
+      showCidadesPorCluster(cluster);
+    });
+  });
+  
+  // Restaurar seleção se houver
+  if(selectedCluster) {
+    clusterRows.forEach(row => {
+      if(row.getAttribute('data-cluster') === selectedCluster) {
+        row.classList.add('selected');
+      }
+    });
+  }
+  
+  // Paleta multicolorida elegante para gráficos
+  const colorPalette = [
+    'rgba(255, 107, 107, 0.8)',
+    'rgba(78, 205, 196, 0.8)',
+    'rgba(69, 183, 209, 0.8)',
+    'rgba(150, 206, 180, 0.8)',
+    'rgba(249, 210, 118, 0.8)',
+    'rgba(255, 204, 92, 0.8)',
+    'rgba(255, 111, 105, 0.8)',
+    'rgba(136, 216, 176, 0.8)',
+    'rgba(181, 234, 215, 0.8)',
+    'rgba(199, 206, 234, 0.8)'
+  ];
+  
+  const borderColorPalette = [
+    'rgb(255, 107, 107)',
+    'rgb(78, 205, 196)',
+    'rgb(69, 183, 209)',
+    'rgb(150, 206, 180)',
+    'rgb(249, 210, 118)',
+    'rgb(255, 204, 92)',
+    'rgb(255, 111, 105)',
+    'rgb(136, 216, 176)',
+    'rgb(181, 234, 215)',
+    'rgb(199, 206, 234)'
+  ];
+  
+  upsertBar('chartCluster','Incidentes',arr.map(x=>x.c),arr.map(x=>x.v),{
+    indexAxis:'y',
+    colorPalette: colorPalette,
+    borderColorPalette: borderColorPalette
+  });
+}
+
+/* ================= Mostrar Cidades por Cluster ================= */
+function showCidadesPorCluster(cluster) {
+  selectedCluster = cluster;
+  
+  // Filtrar dados pelo cluster selecionado
+  const filteredData = RAW.filter(r => r.Cluster === cluster);
+  
+  // Agrupar por cidade
+  const grp = {};
+  filteredData.forEach(r => { grp[r.Cidade] = (grp[r.Cidade] || 0) + 1 });
+  const arr = Object.entries(grp).map(([c,v]) => ({c,v})).sort((a,b) => b.v - a.v);
+  
+  // Atualizar tabela de cidades
+  $('#tblCidade tbody').innerHTML = arr.map(({c,v}) => 
+    `<tr class="slide-in-up">
+      <td>${c}</td>
+      <td class="text-end">${v}</td>
+    </tr>`
+  ).join('');
+  
+  // Paleta multicolorida elegante para gráficos
+  const colorPalette = [
+    'rgba(255, 107, 107, 0.8)',
+    'rgba(78, 205, 196, 0.8)',
+    'rgba(69, 183, 209, 0.8)',
+    'rgba(150, 206, 180, 0.8)',
+    'rgba(249, 210, 118, 0.8)',
+    'rgba(255, 204, 92, 0.8)',
+    'rgba(255, 111, 105, 0.8)',
+    'rgba(136, 216, 176, 0.8)',
+    'rgba(181, 234, 215, 0.8)',
+    'rgba(199, 206, 234, 0.8)'
+  ];
+  
+  const borderColorPalette = [
+    'rgb(255, 107, 107)',
+    'rgb(78, 205, 196)',
+    'rgb(69, 183, 209)',
+    'rgb(150, 206, 180)',
+    'rgb(249, 210, 118)',
+    'rgb(255, 204, 92)',
+    'rgb(255, 111, 105)',
+    'rgb(136, 216, 176)',
+    'rgb(181, 234, 215)',
+    'rgb(199, 206, 234)'
+  ];
+  
+  // Atualizar gráfico de cidades
+  upsertBar('chartCidade','Incidentes',arr.map(x=>x.c),arr.map(x=>x.v),{
+    indexAxis:'y',
+    colorPalette: colorPalette,
+    borderColorPalette: borderColorPalette
+  });
+  
+  // Atualizar título com destaque visual
+  $('#tituloCidade').innerHTML = `Incidentes por Cidade<br><small class="text-muted">Cluster: <strong class="text-primary">${cluster}</strong></small>`;
+  
+  // Destacar a linha do cluster selecionado
+  const clusterRows = document.querySelectorAll('#tblCluster .cluster-row');
+  clusterRows.forEach(row => {
+    row.classList.remove('selected');
+    if (row.getAttribute('data-cluster') === cluster) {
+      row.classList.add('selected');
+    }
+  });
+  
+  // Ativar a aba de cidades
+  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+  
+  document.getElementById('tabCidadeBtn').classList.add('active');
+  document.getElementById('tabCidade').classList.add('show', 'active');
+  
+  // Mostrar botão de voltar
+  document.getElementById('btnVoltarCluster').style.display = 'inline-block';
+}
+
+/* ================= Tipo de Fechamento ================= */
+function renderFechamento(){
+  const grp={}; RAW.forEach(r=>{grp[r.Tipo_Fechamento]=(grp[r.Tipo_Fechamento]||0)+1});
+  const total=Object.values(grp).reduce((a,b)=>a+b,0)||1;
+  const arr=Object.entries(grp).map(([t,v])=>({t,v})).sort((a,b)=>b.v-a.v);
+  $('#tblFechamento tbody').innerHTML=arr.map(e=>`<tr class="slide-in-up">
+    <td>${e.t}</td><td class="text-end">${e.v}</td><td class="text-end">${fmtPct(e.v/total*100)}</td>
+  </tr>`).join('');
+  
+  // Paleta multicolorida elegante para gráfico de pizza
+  const colorPalette = [
+    'rgba(255, 107, 107, 0.8)',
+    'rgba(78, 205, 196, 0.8)',
+    'rgba(69, 183, 209, 0.8)',
+    'rgba(150, 206, 180, 0.8)',
+    'rgba(249, 210, 118, 0.8)',
+    'rgba(255, 204, 92, 0.8)',
+    'rgba(255, 111, 105, 0.8)',
+    'rgba(136, 216, 176, 0.8)',
+    'rgba(181, 234, 215, 0.8)',
+    'rgba(199, 206, 234, 0.8)'
+  ];
+  
+  const borderColorPalette = [
+    'rgb(255, 107, 107)',
+    'rgb(78, 205, 196)',
+    'rgb(69, 183, 209)',
+    'rgb(150, 206, 180)',
+    'rgb(249, 210, 118)',
+    'rgb(255, 204, 92)',
+    'rgb(255, 111, 105)',
+    'rgb(136, 216, 176)',
+    'rgb(181, 234, 215)',
+    'rgb(199, 206, 234)'
+  ];
+  
+  upsertPie('chartFechamento',arr.map(e=>e.t),arr.map(e=>e.v), {
+    colorPalette: colorPalette,
+    borderColorPalette: borderColorPalette
+  });
+  
+  const colors=charts['chartFechamento']?.data.datasets[0].backgroundColor||[];
+  $('#legendFechamento').innerHTML = arr.map((e,i)=>`
+    <div class="d-flex align-items-center mb-2 slide-in-up">
+      <span class="legend-dot me-2" style="background:${colors[i]||'#999'}"></span>
+      <span class="flex-grow-1">${e.t}</span>
+      <span class="text-muted ms-2">${fmtPct(e.v/total*100)}</span>
+    </div>
+  `).join('');
+}
+
+/* ================= Reincidência (com detalhes) - CORRIGIDO ================= */
 function renderReinc(){
   const byNode = groupBy(RAW, 'Node');
   const reinc = Object.entries(byNode)
@@ -210,15 +1233,15 @@ function renderReinc(){
       Cidade: l[0].Cidade, 
       Count: l.length,
       Incidents: l.map(x => ({
+        // REMOVIDO: tipo: x.Tipo_Incidente || '(sem tipo)', - Não existe no arquivo
         solucao: x.Tipo_Fechamento || '(sem solução)',
         data: x.Data ? formatarData(x.Data) : '(sem data)',
-        dataOriginal: x.Data,
+        dataOriginal: x.Data, // Manter o objeto Date original
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
-        qoePos24h: x.QOE_Pos_24h || 0,  // NOVO
         cluster: x.Cluster || '',
         cidade: x.Cidade || '',
-        incidente: x.INCIDENTE || ''
+        incidente: x.INCIDENTE || '' // Número do incidente
       }))
     })).sort((a, b) => b.Count - a.Count);
 
@@ -259,7 +1282,7 @@ function renderReinc(){
   });
 }
 
-/* ================= Toggle Detalhes - ATUALIZADO ================= */
+/* ================= Toggle Detalhes - CORRIGIDO ================= */
 function toggleDetalhesNode(tr, nodeData){
   const expandIcon = tr.querySelector('.expand-icon');
   const nodeName = nodeData.Node;
@@ -307,6 +1330,7 @@ function toggleDetalhesNode(tr, nodeData){
                     ${inc.incidente ? `<small class="text-muted d-block mt-1">Incidente: ${inc.incidente}</small>` : ''}
                   </div>
                   <div class="card-body p-3">
+                    <!-- REMOVIDO: Linha do tipo de incidente que não existe no arquivo -->
                     <div class="mb-2">
                       <strong class="text-dark">Solução:</strong>
                       <span class="ms-2">${inc.solucao}</span>
@@ -321,11 +1345,6 @@ function toggleDetalhesNode(tr, nodeData){
                         <span class="${inc.qoePos > 80 ? 'text-success' : inc.qoePos > 60 ? 'text-warning' : 'text-danger'}">
                           ${inc.qoePos.toFixed(1)}
                         </span>
-                        <i class="bi bi-arrow-right mx-1 text-muted"></i>
-                        <span class="${inc.qoePos24h > 80 ? 'text-success' : inc.qoePos24h > 60 ? 'text-warning' : 'text-danger'}">
-                          ${inc.qoePos24h.toFixed(1)}
-                        </span>
-                        <small class="text-muted ms-1">(24h)</small>
                       </span>
                     </div>
                     <div class="mb-0">
@@ -356,7 +1375,7 @@ function toggleDetalhesNode(tr, nodeData){
   }
 }
 
-/* ================= Dashboard - ATUALIZADO ================= */
+/* ================= Dashboard ================= */
 function renderResumo(){
   const byCluster=groupBy(RAW,'Cluster');
   const wrap=$('#cardsResumo'); wrap.innerHTML='';
@@ -365,8 +1384,6 @@ function renderResumo(){
     const nodes=groupBy(rows,'Node');
     const reinc=Object.values(nodes).filter(a=>a.length>1).length;
     const taxa=total?(reinc/Object.keys(nodes).length*100):0;
-    
-    // ATUALIZADO: Agora usa a nova lógica com QOE Pós 24h
     const varPct=aggregateQoe(rows,['Cluster'])[0]?.varPct||0;
     const qClass=varPct>0?'text-success fw-bold':'text-danger fw-bold';
     const rClass=taxa>20?'text-danger':'text-success';
@@ -410,3 +1427,354 @@ function renderResumo(){
     wrap.appendChild(card);
   });
 }
+
+/* ================= Charts - ATUALIZADO COM PALETA MULTICOR ================= */
+function upsertBar(id,label,labels,data,extra){
+  const ctx=document.getElementById(id);
+  if(charts[id]) charts[id].destroy();
+  
+  // Paleta multicolorida elegante
+  const defaultColorPalette = [
+    'rgba(255, 107, 107, 0.8)',
+    'rgba(78, 205, 196, 0.8)',
+    'rgba(69, 183, 209, 0.8)',
+    'rgba(150, 206, 180, 0.8)',
+    'rgba(249, 210, 118, 0.8)',
+    'rgba(255, 204, 92, 0.8)',
+    'rgba(255, 111, 105, 0.8)',
+    'rgba(136, 216, 176, 0.8)',
+    'rgba(181, 234, 215, 0.8)',
+    'rgba(199, 206, 234, 0.8)'
+  ];
+  
+  const defaultBorderColorPalette = [
+    'rgb(255, 107, 107)',
+    'rgb(78, 205, 196)',
+    'rgb(69, 183, 209)',
+    'rgb(150, 206, 180)',
+    'rgb(249, 210, 118)',
+    'rgb(255, 204, 92)',
+    'rgb(255, 111, 105)',
+    'rgb(136, 216, 176)',
+    'rgb(181, 234, 215)',
+    'rgb(199, 206, 234)'
+  ];
+  
+  const colorPalette = extra?.colorPalette || defaultColorPalette;
+  const borderColorPalette = extra?.borderColorPalette || defaultBorderColorPalette;
+  
+  charts[id]=new Chart(ctx,{
+    type:'bar',
+    data:{ 
+      labels, 
+      datasets:[{ 
+        label, 
+        data,
+        backgroundColor: data.map((_, index) => colorPalette[index % colorPalette.length]),
+        borderColor: data.map((_, index) => borderColorPalette[index % borderColorPalette.length]),
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false,
+      }] 
+    },
+    options:Object.assign({ 
+      responsive: true, 
+      maintainAspectRatio: true,
+      plugins:{ 
+        legend:{ 
+          display: false 
+        },
+        tooltip: {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          titleColor: '#1a1a1a',
+          bodyColor: '#5a5a5a',
+          borderColor: 'rgba(0, 0, 0, 0.1)',
+          borderWidth: 1,
+          cornerRadius: 8,
+          displayColors: true,
+          boxPadding: 6,
+          usePointStyle: true,
+        }
+      },
+      animation: {
+        duration: 1500,
+        easing: 'easeOutQuart'
+      },
+      scales: {
+        x: {
+          grid: {
+            color: 'rgba(0,0,0,0.05)',
+            drawBorder: false,
+          },
+          ticks: {
+            color: 'rgba(0,0,0,0.6)',
+            font: {
+              family: "'Segoe UI', system-ui, sans-serif"
+            }
+          }
+        },
+        y: {
+          grid: {
+            color: 'rgba(0,0,0,0.05)',
+            drawBorder: false,
+          },
+          ticks: {
+            color: 'rgba(0,0,0,0.6)',
+            font: {
+              family: "'Segoe UI', system-ui, sans-serif"
+            }
+          }
+        }
+      }
+    }, extra||{})
+  });
+}
+
+function upsertPie(id,labels,data,extra){
+  const ctx=document.getElementById(id);
+  if(charts[id]) charts[id].destroy();
+  
+  // Paleta multicolorida elegante
+  const defaultColorPalette = [
+    'rgba(255, 107, 107, 0.8)',
+    'rgba(78, 205, 196, 0.8)',
+    'rgba(69, 183, 209, 0.8)',
+    'rgba(150, 206, 180, 0.8)',
+    'rgba(249, 210, 118, 0.8)',
+    'rgba(255, 204, 92, 0.8)',
+    'rgba(255, 111, 105, 0.8)',
+    'rgba(136, 216, 176, 0.8)',
+    'rgba(181, 234, 215, 0.8)',
+    'rgba(199, 206, 234, 0.8)'
+  ];
+  
+  const defaultBorderColorPalette = [
+    'rgb(255, 107, 107)',
+    'rgb(78, 205, 196)',
+    'rgb(69, 183, 209)',
+    'rgb(150, 206, 180)',
+    'rgb(249, 210, 118)',
+    'rgb(255, 204, 92)',
+    'rgb(255, 111, 105)',
+    'rgb(136, 216, 176)',
+    'rgb(181, 234, 215)',
+    'rgb(199, 206, 234)'
+  ];
+  
+  const colorPalette = extra?.colorPalette || defaultColorPalette;
+  const borderColorPalette = extra?.borderColorPalette || defaultBorderColorPalette;
+  
+  charts[id]=new Chart(ctx,{ 
+    type:'pie', 
+    data:{ 
+      labels, 
+      datasets:[{ 
+        data,
+        backgroundColor: data.map((_, index) => colorPalette[index % colorPalette.length]),
+        borderColor: borderColorPalette.map(color => color),
+        borderWidth: 3,
+        hoverOffset: 15
+      }] 
+    }, 
+    options:{ 
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          titleColor: '#1a1a1a',
+          bodyColor: '#5a5a5a',
+          borderColor: 'rgba(0, 0, 0, 0.1)',
+          borderWidth: 1,
+          cornerRadius: 8,
+          displayColors: true,
+          boxPadding: 6,
+          usePointStyle: true,
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      },
+      animation: {
+        duration: 1500,
+        easing: 'easeOutQuart',
+        animateRotate: true,
+        animateScale: true
+      },
+      cutout: '0%'
+    } 
+  });
+}
+
+/* ================= PDF ================= */
+function exportTablePDF(title, tableSelector, chartId){
+  const table=$(tableSelector);
+  const head=Array.from(table.querySelectorAll('thead th')).map(th=>th.innerText);
+  const rows=Array.from(table.querySelectorAll('tbody tr:not(.details-row)')).map(tr=>Array.from(tr.children).map(td=>td.innerText.replace(/\n/g, ' ').trim()));
+
+  let img=null;
+  if(chartId && charts[chartId]) img = charts[chartId].toBase64Image();
+
+  const docDef={
+    pageSize:'A4', pageMargins:[24,24,24,24],
+    content:[
+      { text:title, style:'title' },
+      { text:new Date().toLocaleString('pt-BR'), style:'sub', margin:[0,0,0,6] },
+      img ? { image:img, width:480, margin:[0,0,0,12] } : {},
+      { table:{ headerRows:1, widths:head.map(()=>'*'), body:[ head, ...rows ] }, layout:'lightHorizontalLines' }
+    ],
+    styles:{ title:{fontSize:16,bold:true,color:'#2e7d32'}, sub:{fontSize:9,color:'#666'} }
+  };
+  pdfMake.createPdf(docDef).download(`${title.toLowerCase().replace(/[^a-z0-9]+/g,'_')}.pdf`);
+}
+
+// Event listeners para botões PDF
+document.getElementById('btnPDFCluster').addEventListener('click',()=>exportTablePDF('Incidentes por Cluster','#tblCluster','chartCluster'));
+document.getElementById('btnPDFCidade').addEventListener('click',()=>exportTablePDF('Incidentes por Cidade','#tblCidade','chartCidade'));
+document.getElementById('btnPDFQOE').addEventListener('click',()=>exportTablePDF('QOE Pré vs Pós','#tblQoeNode',null));
+document.getElementById('btnPDFFechamento').addEventListener('click',()=>exportTablePDF('Tipo de Fechamento','#tblFechamento','chartFechamento'));
+document.getElementById('btnPDFReinc').addEventListener('click',()=>exportTablePDF('Log de Reincidência','#tblReinc',null));
+document.getElementById('btnPDFResumo').addEventListener('click',()=>{
+  const byCluster=groupBy(RAW,'Cluster');
+  const head=['Cluster','Incidentes','Δ QOE','Taxa Reinc.'];
+  const body=Object.entries(byCluster).map(([cl,rows])=>{
+    const total=rows.length, nodes=groupBy(rows,'Node');
+    const reinc=Object.values(nodes).filter(a=>a.length>1).length;
+    const taxa=total?(reinc/Object.keys(nodes).length*100):0;
+    const varPct=aggregateQoe(rows,['Cluster'])[0]?.varPct||0;
+    return [ cl, String(total), fmtPct(varPct), fmtPct(taxa) ];
+  });
+  const docDef={ pageSize:'A4', pageMargins:[24,24,24,24],
+    content:[
+      { text:'Dashboard Resumo', style:'title' },
+      { text:new Date().toLocaleString('pt-BR'), style:'sub', margin:[0,0,0,6] },
+      { table:{ headerRows:1, widths:['*','auto','auto','auto'], body:[ head, ...body ] }, layout:'lightHorizontalLines' }
+    ],
+    styles:{ title:{fontSize:16,bold:true,color:'#2e7d32'}, sub:{fontSize:9,color:'#666'} }
+  };
+  pdfMake.createPdf(docDef).download('dashboard_resumo.pdf');
+});
+
+/* ================= Utils ================= */
+function groupBy(a,k){ 
+  return a.reduce((acc, current) => {
+    const groupKey = current[k] || '(não informado)';
+    if (!acc[groupKey]) {
+      acc[groupKey] = [];
+    }
+    acc[groupKey].push(current);
+    return acc;
+  }, {});
+}
+
+/* ================= UI Helpers ================= */
+function showLoading() {
+  hideLoading();
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.id = 'loadingOverlay';
+  overlay.innerHTML = `
+    <div class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-2 text-muted">Processando dados...</p>
+    </div>
+  `;
+  
+  document.querySelector('main').appendChild(overlay);
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+function showToast(message, type = 'info') {
+  const existingToasts = document.querySelectorAll('.toast-container');
+  existingToasts.forEach(toast => toast.remove());
+  
+  const toastContainer = document.createElement('div');
+  toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+  
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-white bg-${type} border-0`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  document.body.appendChild(toastContainer);
+  
+  const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+  bsToast.show();
+}
+
+/* ================= Render inicial ================= */
+function renderAll(){ 
+  renderCluster(); 
+  renderQoe(); 
+  renderFechamento(); 
+  renderReinc(); 
+  renderResumo(); 
+}
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+  
+  document.getElementById('btnVoltarCluster').style.display = 'none';
+  
+  document.getElementById('btnVoltarCluster').addEventListener('click', function() {
+    selectedCluster = null;
+    
+    document.querySelectorAll('#tblCluster .cluster-row').forEach(row => {
+      row.classList.remove('selected');
+    });
+    
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+    
+    document.getElementById('tabClusterBtn').classList.add('active');
+    document.getElementById('tabCluster').classList.add('show', 'active');
+    
+    this.style.display = 'none';
+  });
+  
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function() {
+      if(this.id !== 'tabCidadeBtn') {
+        document.getElementById('btnVoltarCluster').style.display = 'none';
+      } else if(selectedCluster) {
+        document.getElementById('btnVoltarCluster').style.display = 'inline-block';
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
