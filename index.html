@@ -534,25 +534,25 @@
     .chart-color-9 { background: linear-gradient(135deg, #B5EAD7, #D1F4E6); }
     .chart-color-10 { background: linear-gradient(135deg, #C7CEEA, #DDE2F5); }
     
-    /* Assinatura */
+    /* Assinatura mais discreta */
     .assinatura {
       position: fixed;
-      bottom: 10px;
-      right: 20px;
-      background: var(--card-bg);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      bottom: 8px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
       color: var(--text-muted);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(5px);
       z-index: 1000;
       animation: fadeIn 0.8s ease-out;
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
     
     .assinatura strong {
       color: var(--primary);
+      font-weight: 600;
     }
     
     @media (max-width: 768px) {
@@ -573,8 +573,9 @@
       .assinatura {
         position: static;
         text-align: center;
-        margin-top: 20px;
-        border-radius: 12px;
+        margin-top: 15px;
+        border-radius: 8px;
+        background: var(--card-bg);
       }
     }
   </style>
@@ -798,7 +799,7 @@
   </div>
 </div>
 
-<!-- Assinatura -->
+<!-- Assinatura mais discreta -->
 <div class="assinatura">
   <strong>Desenvolvido por:</strong> N6105010 e N5923221
 </div>
@@ -812,8 +813,8 @@ const $=(s,c=document)=>c.querySelector(s);
 let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
 
-/* ================= Mapeamento flexível de cabeçalhos ================= */
-// ATUALIZADO: Mapeamento correto baseado no arquivo de exemplo
+/* ================= Mapeamento flexível de cabeçalhos - CORRIGIDO ================= */
+// Mapeamento mais abrangente e flexível
 const AUTO_MAP={
   'INCIDENTE':'INCIDENTE',
   'CIDADE':'Cidade',
@@ -824,19 +825,27 @@ const AUTO_MAP={
   'HI INICIO':'Data',
   'HI INÍCIO':'Data',
   'DATA':'Data',
+  'DATA INICIO':'Data',
+  'DATA INÍCIO':'Data',
   'NODE':'Node',
+  'NÓ':'Node',
   'QOE PRÉ':'QOE_Pre',
   'QOE PRE':'QOE_Pre',
   'QOE_PRE':'QOE_Pre',
+  'QOE PRE INCIDENTE':'QOE_Pre',
   'QOE PÓS':'QOE_Pos',
   'QOE POS':'QOE_Pos',
   'QOE_POS':'QOE_Pos',
+  'QOE PÓS INCIDENTE':'QOE_Pos',
   'QOE 24H':'QOE_24h',
   'QOE_24H':'QOE_24h',
   'QOE24H':'QOE_24h',
+  'QOE 24H PÓS':'QOE_24h',
   'SOLUÇÃO':'Tipo_Fechamento',
   'SOLUCAO':'Tipo_Fechamento',
-  'TIPO_FECHAMENTO':'Tipo_Fechamento'
+  'TIPO_FECHAMENTO':'Tipo_Fechamento',
+  'TIPO SOLUCAO':'Tipo_Fechamento',
+  'TIPO SOLUÇÃO':'Tipo_Fechamento'
 };
 
 function normalizeHeader(str) {
@@ -844,7 +853,8 @@ function normalizeHeader(str) {
     .trim()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
     .toUpperCase()
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, ' ')
+    .replace(/[^A-Z0-9\s]/g, ''); // remove caracteres especiais
 }
 
 /* ================= Proteções QOE ================= */
@@ -961,7 +971,7 @@ fileInput.addEventListener('change',e=>{
   }
 });
 
-/* ================= Leitura robusta da planilha ================= */
+/* ================= Leitura robusta da planilha - CORRIGIDA ================= */
 function handleFile(file){
   const reader=new FileReader();
   reader.onload=e=>{
@@ -969,6 +979,8 @@ function handleFile(file){
       const data=new Uint8Array(e.target.result);
       const wb=XLSX.read(data,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
+      
+      // Usar sheet_to_json com header: 1 para obter array de arrays
       const json=XLSX.utils.sheet_to_json(ws,{defval:'',header:1});
 
       // Detecta a linha do cabeçalho (primeira linha não vazia)
@@ -990,27 +1002,41 @@ function handleFile(file){
 
       const rows = dataRows.map(r => {
         const o={};
-        mappedHeader.forEach((h,i)=>o[h]=r[i]);
+        mappedHeader.forEach((h,i)=>{
+          if (h && h !== '') { // Só mapear se houver um cabeçalho válido
+            o[h] = r[i];
+          }
+        });
         
-        // Conversões/limpezas - CORRIGIDO
+        // Conversões/limpezas - CORRIGIDO para ser mais tolerante
         o['Data'] = validarData(String(o['Data'] || ''));
-        o['QOE_Pre']=Number(String(o['QOE_Pre']||'0').toString().replace(',','.')); 
-        if(!isFinite(o['QOE_Pre'])) o['QOE_Pre']=0;
         
-        o['QOE_Pos']=Number(String(o['QOE_Pos']||'0').toString().replace(',','.')); 
-        if(!isFinite(o['QOE_Pos'])) o['QOE_Pos']=0;
+        // Processar valores QOE de forma mais robusta
+        ['QOE_Pre', 'QOE_Pos', 'QOE_24h'].forEach(key => {
+          if (o[key] !== undefined) {
+            let value = String(o[key]).replace(',','.').replace(/[^\d.-]/g, '');
+            o[key] = Number(value);
+            if(!isFinite(o[key]) || isNaN(o[key])) o[key] = 0;
+          } else {
+            o[key] = 0;
+          }
+        });
         
-        o['QOE_24h']=Number(String(o['QOE_24h']||'0').toString().replace(',','.')); 
-        if(!isFinite(o['QOE_24h'])) o['QOE_24h']=0;
-        
-        // Mapear campos de texto
+        // Mapear campos de texto com fallbacks
         ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
-          o[k]=String(o[k]||'').trim();
+          o[k] = String(o[k] || '').trim();
           if(o[k]==='') o[k]='(não informado)';
         });
         
         return o;
-      });
+      }).filter(row => 
+        // Filtrar linhas que têm pelo menos algum dado relevante
+        row.Cluster !== '(não informado)' || 
+        row.Node !== '(não informado)' || 
+        row.Cidade !== '(não informado)' ||
+        row.QOE_Pre > 0 || 
+        row.QOE_Pos > 0
+      );
 
       if(rows.length===0){ 
         showToast('⚠️ Nenhum registro válido encontrado na planilha.', 'warning'); 
@@ -1021,11 +1047,12 @@ function handleFile(file){
       
       // DEBUG: Mostrar primeiras linhas processadas
       console.log('Primeiras 3 linhas processadas:', rows.slice(0, 3));
+      console.log('Total de registros:', rows.length);
       
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
     }catch(err){
-      console.error(err);
+      console.error('Erro detalhado:', err);
       showToast('❌ Erro ao processar a planilha. Verifique o formato e tente novamente.', 'danger');
     }
   };
