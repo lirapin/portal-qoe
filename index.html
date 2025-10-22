@@ -48,6 +48,7 @@
       line-height: 1.6;
       min-height: 100vh;
       overflow-x: hidden;
+      padding-bottom: 50px; /* Espaço para a assinatura */
     }
     
     .app-header {
@@ -176,15 +177,6 @@
       opacity: 1;
     }
     
-    .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: .5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
     .chart-wrap {
       position: relative;
       height: 380px;
@@ -292,46 +284,6 @@
       left: 100%;
     }
     
-    .btn-outline-primary {
-      color: var(--primary);
-      border-color: var(--primary);
-      border-radius: 12px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-outline-primary:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .text-success {
-      color: var(--success) !important;
-    }
-    
-    .text-warning {
-      color: var(--warning) !important;
-    }
-    
-    .text-danger {
-      color: var(--danger) !important;
-    }
-    
-    .fw-bold {
-      font-weight: 700 !important;
-    }
-    
-    .pointer {
-      cursor: pointer;
-    }
-    
-    .details-row td {
-      border-top: none;
-      font-size: .9rem;
-    }
-    
     .section-title {
       color: var(--primary);
       font-weight: 700;
@@ -372,11 +324,6 @@
       color: white;
     }
     
-    .badge-warning {
-      background: linear-gradient(135deg, var(--warning) 0%, #ffb74d 100%);
-      color: white;
-    }
-    
     .badge-danger {
       background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
       color: white;
@@ -395,11 +342,6 @@
       z-index: 20;
       border-radius: 16px;
       backdrop-filter: blur(10px);
-    }
-    
-    .spinner-border-sm {
-      width: 1.5rem;
-      height: 1.5rem;
     }
     
     .cluster-row {
@@ -427,7 +369,6 @@
       animation: fadeIn 0.5s ease 0.3s forwards;
     }
     
-    /* Estilos para o log de reincidência expansível */
     .details-content {
       border-left: 4px solid var(--primary);
       border-radius: 0 12px 12px 0;
@@ -448,26 +389,12 @@
       backdrop-filter: blur(10px);
     }
     
-    .details-row .card {
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--card-bg);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    .details-row .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-md);
-    }
-    
     .badge.rounded-pill {
       font-size: 0.75rem;
       padding: 6px 12px;
       font-weight: 600;
     }
     
-    /* Animações refinadas */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -484,79 +411,36 @@
       }
     }
     
-    @keyframes scaleIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.6s ease-out;
-    }
-    
     .slide-in-up {
       animation: slideInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .scale-in {
-      animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    /* Efeitos de entrada sequenciais para as abas */
     .tab-pane {
       animation: fadeIn 0.5s ease-out;
     }
     
-    .tab-pane .row > * {
-      opacity: 0;
-      animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    
-    .tab-pane .row > *:nth-child(1) { animation-delay: 0.1s; }
-    .tab-pane .row > *:nth-child(2) { animation-delay: 0.2s; }
-    .tab-pane .row > *:nth-child(3) { animation-delay: 0.3s; }
-    .tab-pane .row > *:nth-child(4) { animation-delay: 0.4s; }
-    
-    /* Paleta de cores para gráficos */
-    .chart-color-1 { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
-    .chart-color-2 { background: linear-gradient(135deg, #4ECDC4, #6CE5E5); }
-    .chart-color-3 { background: linear-gradient(135deg, #45B7D1, #67D4FF); }
-    .chart-color-4 { background: linear-gradient(135deg, #96CEB4, #B4E8C9); }
-    .chart-color-5 { background: linear-gradient(135deg, #F9D276, #FFE4A1); }
-    .chart-color-6 { background: linear-gradient(135deg, #FFCC5C, #FFDD8E); }
-    .chart-color-7 { background: linear-gradient(135deg, #FF6F69, #FF9C96); }
-    .chart-color-8 { background: linear-gradient(135deg, #88D8B0, #A8E8C5); }
-    .chart-color-9 { background: linear-gradient(135deg, #B5EAD7, #D1F4E6); }
-    .chart-color-10 { background: linear-gradient(135deg, #C7CEEA, #DDE2F5); }
-    
     /* Assinatura discreta e centralizada */
     .assinatura {
       position: fixed;
-      bottom: 12px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.85);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      backdrop-filter: blur(10px);
+      background: rgba(150, 150, 150, 0.1);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.65rem;
+      color: #666;
+      backdrop-filter: blur(5px);
       z-index: 1000;
       animation: fadeIn 0.8s ease-out;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       text-align: center;
       max-width: 90%;
     }
     
     .assinatura strong {
-      color: var(--primary);
-      font-weight: 600;
+      color: #555;
+      font-weight: 500;
     }
     
     @media (max-width: 768px) {
@@ -581,7 +465,7 @@
         transform: none;
         margin: 20px auto 10px;
         width: 90%;
-        border-radius: 12px;
+        border-radius: 8px;
       }
     }
   </style>
@@ -590,9 +474,6 @@
 <header class="app-header py-3">
   <div class="container-fluid d-flex justify-content-between align-items-center">
     <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Análise de Incidentes</h1>
-    <div class="d-flex gap-2">
-      <!-- Upload removido do header -->
-    </div>
   </div>
 </header>
 
@@ -759,7 +640,6 @@
                     <tbody></tbody>
                   </table>
                 </div>
-                <div id="legendFechamento" class="mt-4 small"></div>
               </div>
             </div>
           </div>
@@ -805,7 +685,7 @@
   </div>
 </div>
 
-<!-- Assinatura mais discreta -->
+<!-- Assinatura discreta -->
 <div class="assinatura">
   <strong>Desenvolvido por:</strong> N6105010 e N5923221
 </div>
@@ -819,8 +699,7 @@ const $=(s,c=document)=>c.querySelector(s);
 let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
 
-/* ================= Mapeamento flexível de cabeçalhos - CORRIGIDO ================= */
-// Mapeamento mais abrangente e flexível
+/* ================= Mapeamento flexível de cabeçalhos ================= */
 const AUTO_MAP={
   'INCIDENTE':'INCIDENTE',
   'CIDADE':'Cidade',
@@ -857,20 +736,21 @@ const AUTO_MAP={
 function normalizeHeader(str) {
   return String(str || '')
     .trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
     .replace(/\s+/g, ' ')
-    .replace(/[^A-Z0-9\s]/g, ''); // remove caracteres especiais
+    .replace(/[^A-Z0-9\s]/g, '');
 }
 
 /* ================= Cálculo de Melhoria e Status ================= */
 function calcularMelhoriaStatus(qpre, qpos, q24h) {
-  // Determinar qual QoE usar (24h tem prioridade)
-  const qoeUsado = (q24h !== undefined && q24h !== null && q24h !== 0) ? q24h : qpos;
+  // Determinar qual QoE usar (24h tem prioridade absoluta)
+  const qoeUsado = (q24h !== undefined && q24h !== null && q24h !== 0 && isFinite(q24h)) ? q24h : 
+                   (qpos !== undefined && qpos !== null && qpos !== 0 && isFinite(qpos)) ? qpos : null;
   
   // Verificar se temos dados suficientes para cálculo
-  if (!isFinite(qpre) || qpre <= 0 || !isFinite(qoeUsado)) {
-    return { melhoria: 0, status: '—' };
+  if (!isFinite(qpre) || qpre <= 0 || qoeUsado === null) {
+    return { melhoria: null, status: '—' };
   }
   
   // Calcular melhoria percentual
@@ -883,32 +763,28 @@ function calcularMelhoriaStatus(qpre, qpos, q24h) {
 }
 
 /* ================= Proteções QOE ================= */
-function safeVarPct(qpre,qpos){
-  if(!isFinite(qpre)||qpre<=0) return 0;
-  return ((qpos - qpre)/qpre)*100;
-}
 function fmtPct(n){
-  if(!isFinite(n) || Math.abs(n)>1000) return '—';
-  return `${n.toFixed(1)}%`;
+  if(!isFinite(n) || n === null) return '—';
+  return `${n > 0 ? '+' : ''}${n.toFixed(1)}%`;
 }
-function fmtNum(n){ return isFinite(n) ? n.toFixed(1) : '—'; }
+
+function fmtNum(n){ 
+  return isFinite(n) && n !== null && n !== 0 ? n.toFixed(1) : '—'; 
+}
 
 /* ================= Validação de Datas ================= */
 function validarData(dataStr) {
   if (!dataStr || dataStr === '') return null;
   
-  // Se já é um objeto Date válido
   if (dataStr instanceof Date && !isNaN(dataStr.getTime())) {
     return dataStr;
   }
   
   dataStr = String(dataStr).trim();
   
-  // Tentar parse como Date primeiro
   let data = new Date(dataStr);
   if (!isNaN(data.getTime())) return data;
   
-  // Tentar corrigir formatos com barras (problema: 16/20/2025)
   if (dataStr.includes('/')) {
     const partes = dataStr.split(/[/\s:]/);
     if (partes.length >= 3) {
@@ -916,51 +792,25 @@ function validarData(dataStr) {
       let mes = parseInt(partes[1]) - 1;
       let ano = parseInt(partes[2]);
       
-      // Corrigir datas com formato inválido (mês > 12)
       if (mes > 11) {
-        // Trocar dia e mês
         [dia, mes] = [mes + 1, dia - 1];
       }
       
-      // Tentar criar data com os valores corrigidos
       data = new Date(ano, mes, dia);
       if (!isNaN(data.getTime())) return data;
     }
   }
   
-  // Tentar formato ISO
   data = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'));
   if (!isNaN(data.getTime())) return data;
   
-  console.warn('Data inválida encontrada:', dataStr);
   return null;
-}
-
-/* ================= Função Auxiliar para Formatar Data ================= */
-function formatarData(data) {
-  if (!data || !(data instanceof Date) || isNaN(data.getTime())) {
-    return '(sem data)';
-  }
-  
-  try {
-    return data.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (error) {
-    console.error('Erro ao formatar data:', error, data);
-    return '(erro na data)';
-  }
 }
 
 /* ================= Upload ================= */
 const dropArea=$('#dropArea');
 const fileInput = $('#fileInput');
 
-// Eventos de drag and drop
 ['dragenter','dragover'].forEach(evt=>dropArea.addEventListener(evt,e=>{
   e.preventDefault(); 
   dropArea.classList.add('dragover');
@@ -980,7 +830,6 @@ dropArea.addEventListener('drop',e=>{
   }
 });
 
-// Adicionar clique na área de upload para abrir o seletor de arquivos
 dropArea.addEventListener('click', () => {
   fileInput.click();
 });
@@ -996,7 +845,7 @@ fileInput.addEventListener('change',e=>{
   }
 });
 
-/* ================= Leitura robusta da planilha - CORRIGIDA ================= */
+/* ================= Leitura da planilha ================= */
 function handleFile(file){
   const reader=new FileReader();
   reader.onload=e=>{
@@ -1005,10 +854,8 @@ function handleFile(file){
       const wb=XLSX.read(data,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       
-      // Usar sheet_to_json com header: 1 para obter array de arrays
       const json=XLSX.utils.sheet_to_json(ws,{defval:'',header:1});
 
-      // Detecta a linha do cabeçalho (primeira linha não vazia)
       let headerRowIndex = json.findIndex(row => Array.isArray(row) && row.some(cell => String(cell).trim() !== ''));
       if (headerRowIndex === -1) { 
         showToast('❌ Planilha vazia ou inválida', 'danger');
@@ -1018,36 +865,28 @@ function handleFile(file){
       const rawHeader = (json[headerRowIndex]||[]).map(normalizeHeader);
       const mappedHeader = rawHeader.map(h => AUTO_MAP[h] || h);
 
-      // DEBUG: Mostrar mapeamento no console
-      console.log('Cabeçalhos originais:', rawHeader);
-      console.log('Cabeçalhos mapeados:', mappedHeader);
-
-      // Linhas úteis (descarta vazias)
       const dataRows = json.slice(headerRowIndex+1).filter(r => Array.isArray(r) && r.some(cell => String(cell).trim() !== ''));
 
       const rows = dataRows.map(r => {
         const o={};
         mappedHeader.forEach((h,i)=>{
-          if (h && h !== '') { // Só mapear se houver um cabeçalho válido
+          if (h && h !== '') {
             o[h] = r[i];
           }
         });
         
-        // Conversões/limpezas - CORRIGIDO para ser mais tolerante
         o['Data'] = validarData(String(o['Data'] || ''));
         
-        // Processar valores QOE de forma mais robusta
         ['QOE_Pre', 'QOE_Pos', 'QOE_24h'].forEach(key => {
           if (o[key] !== undefined) {
             let value = String(o[key]).replace(',','.').replace(/[^\d.-]/g, '');
-            o[key] = Number(value);
+            o[key] = value ? Number(value) : 0;
             if(!isFinite(o[key]) || isNaN(o[key])) o[key] = 0;
           } else {
             o[key] = 0;
           }
         });
         
-        // Mapear campos de texto com fallbacks
         ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
           o[k] = String(o[k] || '').trim();
           if(o[k]==='') o[k]='(não informado)';
@@ -1055,7 +894,6 @@ function handleFile(file){
         
         return o;
       }).filter(row => 
-        // Filtrar linhas que têm pelo menos algum dado relevante
         row.Cluster !== '(não informado)' || 
         row.Node !== '(não informado)' || 
         row.Cidade !== '(não informado)' ||
@@ -1070,10 +908,6 @@ function handleFile(file){
 
       DATA_ALL=rows; RAW=[...rows];
       
-      // DEBUG: Mostrar primeiras linhas processadas
-      console.log('Primeiras 3 linhas processadas:', rows.slice(0, 3));
-      console.log('Total de registros:', rows.length);
-      
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
     }catch(err){
@@ -1084,7 +918,7 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-/* ================= QOE - MODIFICADA COM MELHORIA E STATUS ================= */
+/* ================= QOE - COM MELHORIA E STATUS ================= */
 function colorByValue(v){
   if(!isFinite(v)) return '';
   if(v <= 40) return 'text-danger fw-bold';
@@ -1099,7 +933,7 @@ function renderQoe(){
     const { melhoria, status } = calcularMelhoriaStatus(r.qoePre, r.qoePos, r.qoe24h);
     
     // Formatar melhoria com cor
-    const melhoriaFormatada = isFinite(melhoria) ? melhoria.toFixed(1) + '%' : '—';
+    const melhoriaFormatada = fmtPct(melhoria);
     const melhoriaClass = melhoria > 0 ? 'text-success fw-bold' : 
                          melhoria < 0 ? 'text-danger fw-bold' : 'text-muted';
     
@@ -1138,7 +972,7 @@ function aggregateQoe(rows,keys){
     const pre=v.cnt?v.qpre/v.cnt:0;
     const pos=v.cnt?v.qpos/v.cnt:0;
     const q24h=v.cnt?v.q24h/v.cnt:0;
-    return {...v,qoePre:pre,qoePos:pos,qoe24h:q24h,varPct:safeVarPct(pre,pos)};
+    return {...v,qoePre:pre,qoePos:pos,qoe24h:q24h};
   });
 }
 
@@ -1155,7 +989,6 @@ function renderCluster(){
     </tr>`
   ).join('');
   
-  // Adicionar event listeners para as linhas
   const clusterRows = document.querySelectorAll('#tblCluster .cluster-row');
   clusterRows.forEach(row => {
     row.addEventListener('click', function() {
@@ -1164,7 +997,6 @@ function renderCluster(){
     });
   });
   
-  // Restaurar seleção se houver
   if(selectedCluster) {
     clusterRows.forEach(row => {
       if(row.getAttribute('data-cluster') === selectedCluster) {
@@ -1173,18 +1005,12 @@ function renderCluster(){
     });
   }
   
-  // Paleta multicolorida elegante para gráficos
   const colorPalette = [
     'rgba(255, 107, 107, 0.8)',
     'rgba(78, 205, 196, 0.8)',
     'rgba(69, 183, 209, 0.8)',
     'rgba(150, 206, 180, 0.8)',
-    'rgba(249, 210, 118, 0.8)',
-    'rgba(255, 204, 92, 0.8)',
-    'rgba(255, 111, 105, 0.8)',
-    'rgba(136, 216, 176, 0.8)',
-    'rgba(181, 234, 215, 0.8)',
-    'rgba(199, 206, 234, 0.8)'
+    'rgba(249, 210, 118, 0.8)'
   ];
   
   const borderColorPalette = [
@@ -1192,12 +1018,7 @@ function renderCluster(){
     'rgb(78, 205, 196)',
     'rgb(69, 183, 209)',
     'rgb(150, 206, 180)',
-    'rgb(249, 210, 118)',
-    'rgb(255, 204, 92)',
-    'rgb(255, 111, 105)',
-    'rgb(136, 216, 176)',
-    'rgb(181, 234, 215)',
-    'rgb(199, 206, 234)'
+    'rgb(249, 210, 118)'
   ];
   
   upsertBar('chartCluster','Incidentes',arr.map(x=>x.c),arr.map(x=>x.v),{
@@ -1211,15 +1032,12 @@ function renderCluster(){
 function showCidadesPorCluster(cluster) {
   selectedCluster = cluster;
   
-  // Filtrar dados pelo cluster selecionado
   const filteredData = RAW.filter(r => r.Cluster === cluster);
   
-  // Agrupar por cidade
   const grp = {};
   filteredData.forEach(r => { grp[r.Cidade] = (grp[r.Cidade] || 0) + 1 });
   const arr = Object.entries(grp).map(([c,v]) => ({c,v})).sort((a,b) => b.v - a.v);
   
-  // Atualizar tabela de cidades
   $('#tblCidade tbody').innerHTML = arr.map(({c,v}) => 
     `<tr class="slide-in-up">
       <td>${c}</td>
@@ -1227,18 +1045,12 @@ function showCidadesPorCluster(cluster) {
     </tr>`
   ).join('');
   
-  // Paleta multicolorida elegante para gráficos
   const colorPalette = [
     'rgba(255, 107, 107, 0.8)',
     'rgba(78, 205, 196, 0.8)',
     'rgba(69, 183, 209, 0.8)',
     'rgba(150, 206, 180, 0.8)',
-    'rgba(249, 210, 118, 0.8)',
-    'rgba(255, 204, 92, 0.8)',
-    'rgba(255, 111, 105, 0.8)',
-    'rgba(136, 216, 176, 0.8)',
-    'rgba(181, 234, 215, 0.8)',
-    'rgba(199, 206, 234, 0.8)'
+    'rgba(249, 210, 118, 0.8)'
   ];
   
   const borderColorPalette = [
@@ -1246,25 +1058,17 @@ function showCidadesPorCluster(cluster) {
     'rgb(78, 205, 196)',
     'rgb(69, 183, 209)',
     'rgb(150, 206, 180)',
-    'rgb(249, 210, 118)',
-    'rgb(255, 204, 92)',
-    'rgb(255, 111, 105)',
-    'rgb(136, 216, 176)',
-    'rgb(181, 234, 215)',
-    'rgb(199, 206, 234)'
+    'rgb(249, 210, 118)'
   ];
   
-  // Atualizar gráfico de cidades
   upsertBar('chartCidade','Incidentes',arr.map(x=>x.c),arr.map(x=>x.v),{
     indexAxis:'y',
     colorPalette: colorPalette,
     borderColorPalette: borderColorPalette
   });
   
-  // Atualizar título com destaque visual
   $('#tituloCidade').innerHTML = `Incidentes por Cidade<br><small class="text-muted">Cluster: <strong class="text-primary">${cluster}</strong></small>`;
   
-  // Destacar a linha do cluster selecionado
   const clusterRows = document.querySelectorAll('#tblCluster .cluster-row');
   clusterRows.forEach(row => {
     row.classList.remove('selected');
@@ -1273,14 +1077,12 @@ function showCidadesPorCluster(cluster) {
     }
   });
   
-  // Ativar a aba de cidades
   document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
   
   document.getElementById('tabCidadeBtn').classList.add('active');
   document.getElementById('tabCidade').classList.add('show', 'active');
   
-  // Mostrar botão de voltar
   document.getElementById('btnVoltarCluster').style.display = 'inline-block';
 }
 
@@ -1290,21 +1092,15 @@ function renderFechamento(){
   const total=Object.values(grp).reduce((a,b)=>a+b,0)||1;
   const arr=Object.entries(grp).map(([t,v])=>({t,v})).sort((a,b)=>b.v-a.v);
   $('#tblFechamento tbody').innerHTML=arr.map(e=>`<tr class="slide-in-up">
-    <td>${e.t}</td><td class="text-end">${e.v}</td><td class="text-end">${fmtPct(e.v/total*100)}</td>
+    <td>${e.t}</td><td class="text-end">${e.v}</td><td class="text-end">${(e.v/total*100).toFixed(1)}%</td>
   </tr>`).join('');
   
-  // Paleta multicolorida elegante para gráfico de pizza
   const colorPalette = [
     'rgba(255, 107, 107, 0.8)',
     'rgba(78, 205, 196, 0.8)',
     'rgba(69, 183, 209, 0.8)',
     'rgba(150, 206, 180, 0.8)',
-    'rgba(249, 210, 118, 0.8)',
-    'rgba(255, 204, 92, 0.8)',
-    'rgba(255, 111, 105, 0.8)',
-    'rgba(136, 216, 176, 0.8)',
-    'rgba(181, 234, 215, 0.8)',
-    'rgba(199, 206, 234, 0.8)'
+    'rgba(249, 210, 118, 0.8)'
   ];
   
   const borderColorPalette = [
@@ -1312,30 +1108,16 @@ function renderFechamento(){
     'rgb(78, 205, 196)',
     'rgb(69, 183, 209)',
     'rgb(150, 206, 180)',
-    'rgb(249, 210, 118)',
-    'rgb(255, 204, 92)',
-    'rgb(255, 111, 105)',
-    'rgb(136, 216, 176)',
-    'rgb(181, 234, 215)',
-    'rgb(199, 206, 234)'
+    'rgb(249, 210, 118)'
   ];
   
   upsertPie('chartFechamento',arr.map(e=>e.t),arr.map(e=>e.v), {
     colorPalette: colorPalette,
     borderColorPalette: borderColorPalette
   });
-  
-  const colors=charts['chartFechamento']?.data.datasets[0].backgroundColor||[];
-  $('#legendFechamento').innerHTML = arr.map((e,i)=>`
-    <div class="d-flex align-items-center mb-2 slide-in-up">
-      <span class="legend-dot me-2" style="background:${colors[i]||'#999'}"></span>
-      <span class="flex-grow-1">${e.t}</span>
-      <span class="text-muted ms-2">${fmtPct(e.v/total*100)}</span>
-    </div>
-  `).join('');
 }
 
-/* ================= Reincidência (com detalhes) - CORRIGIDO ================= */
+/* ================= Reincidência ================= */
 function renderReinc(){
   const byNode = groupBy(RAW, 'Node');
   const reinc = Object.entries(byNode)
@@ -1348,12 +1130,11 @@ function renderReinc(){
       Incidents: l.map(x => ({
         solucao: x.Tipo_Fechamento || '(sem solução)',
         data: x.Data ? formatarData(x.Data) : '(sem data)',
-        dataOriginal: x.Data, // Manter o objeto Date original
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
         cidade: x.Cidade || '',
-        incidente: x.INCIDENTE || '' // Número do incidente
+        incidente: x.INCIDENTE || ''
       }))
     })).sort((a, b) => b.Count - a.Count);
 
@@ -1394,7 +1175,7 @@ function renderReinc(){
   });
 }
 
-/* ================= Toggle Detalhes - CORRIGIDO ================= */
+/* ================= Toggle Detalhes ================= */
 function toggleDetalhesNode(tr, nodeData){
   const expandIcon = tr.querySelector('.expand-icon');
   const nodeName = nodeData.Node;
@@ -1475,14 +1256,6 @@ function toggleDetalhesNode(tr, nodeData){
     expandIcon.classList.remove('bi-chevron-right');
     expandIcon.classList.add('bi-chevron-down');
     tr.classList.add('table-active');
-    
-    detailsRow.style.opacity = '0';
-    detailsRow.style.transform = 'translateY(-10px)';
-    setTimeout(() => {
-      detailsRow.style.transition = 'all 0.3s ease';
-      detailsRow.style.opacity = '1';
-      detailsRow.style.transform = 'translateY(0)';
-    }, 10);
   }
 }
 
@@ -1495,9 +1268,6 @@ function renderResumo(){
     const nodes=groupBy(rows,'Node');
     const reinc=Object.values(nodes).filter(a=>a.length>1).length;
     const taxa=total?(reinc/Object.keys(nodes).length*100):0;
-    const varPct=aggregateQoe(rows,['Cluster'])[0]?.varPct||0;
-    const qClass=varPct>0?'text-success fw-bold':'text-danger fw-bold';
-    const rClass=taxa>20?'text-danger':'text-success';
 
     const card=document.createElement('div'); 
     card.className='col-12 col-md-6 col-lg-4';
@@ -1515,22 +1285,13 @@ function renderResumo(){
               <div class="h4 mb-0 fw-bold">${total}</div>
             </div>
           </div>
-          <div class="d-flex align-items-center mb-3">
-            <div class="me-3">
-              <i class="bi bi-arrow-left-right fs-4 ${qClass.replace('fw-bold', '')}"></i>
-            </div>
-            <div>
-              <div class="text-muted small">Variação QOE</div>
-              <div class="h5 mb-0 ${qClass}">${fmtPct(varPct)}</div>
-            </div>
-          </div>
           <div class="d-flex align-items-center">
             <div class="me-3">
-              <i class="bi bi-clock-history fs-4 ${rClass.replace('text-danger', 'text-warning').replace('text-success', 'text-info')}"></i>
+              <i class="bi bi-clock-history fs-4 ${taxa>20?'text-danger':'text-info'}"></i>
             </div>
             <div>
               <div class="text-muted small">Taxa de Reincidência</div>
-              <div class="h5 mb-0 ${rClass}">${fmtPct(taxa)}</div>
+              <div class="h5 mb-0 ${taxa>20?'text-danger':'text-info'}">${taxa.toFixed(1)}%</div>
             </div>
           </div>
         </div>
@@ -1539,23 +1300,17 @@ function renderResumo(){
   });
 }
 
-/* ================= Charts - ATUALIZADO COM PALETA MULTICOR ================= */
+/* ================= Charts ================= */
 function upsertBar(id,label,labels,data,extra){
   const ctx=document.getElementById(id);
   if(charts[id]) charts[id].destroy();
   
-  // Paleta multicolorida elegante
   const defaultColorPalette = [
     'rgba(255, 107, 107, 0.8)',
     'rgba(78, 205, 196, 0.8)',
     'rgba(69, 183, 209, 0.8)',
     'rgba(150, 206, 180, 0.8)',
-    'rgba(249, 210, 118, 0.8)',
-    'rgba(255, 204, 92, 0.8)',
-    'rgba(255, 111, 105, 0.8)',
-    'rgba(136, 216, 176, 0.8)',
-    'rgba(181, 234, 215, 0.8)',
-    'rgba(199, 206, 234, 0.8)'
+    'rgba(249, 210, 118, 0.8)'
   ];
   
   const defaultBorderColorPalette = [
@@ -1563,12 +1318,7 @@ function upsertBar(id,label,labels,data,extra){
     'rgb(78, 205, 196)',
     'rgb(69, 183, 209)',
     'rgb(150, 206, 180)',
-    'rgb(249, 210, 118)',
-    'rgb(255, 204, 92)',
-    'rgb(255, 111, 105)',
-    'rgb(136, 216, 176)',
-    'rgb(181, 234, 215)',
-    'rgb(199, 206, 234)'
+    'rgb(249, 210, 118)'
   ];
   
   const colorPalette = extra?.colorPalette || defaultColorPalette;
@@ -1603,8 +1353,6 @@ function upsertBar(id,label,labels,data,extra){
           borderWidth: 1,
           cornerRadius: 8,
           displayColors: true,
-          boxPadding: 6,
-          usePointStyle: true,
         }
       },
       animation: {
@@ -1619,9 +1367,6 @@ function upsertBar(id,label,labels,data,extra){
           },
           ticks: {
             color: 'rgba(0,0,0,0.6)',
-            font: {
-              family: "'Segoe UI', system-ui, sans-serif"
-            }
           }
         },
         y: {
@@ -1631,9 +1376,6 @@ function upsertBar(id,label,labels,data,extra){
           },
           ticks: {
             color: 'rgba(0,0,0,0.6)',
-            font: {
-              family: "'Segoe UI', system-ui, sans-serif"
-            }
           }
         }
       }
@@ -1645,18 +1387,12 @@ function upsertPie(id,labels,data,extra){
   const ctx=document.getElementById(id);
   if(charts[id]) charts[id].destroy();
   
-  // Paleta multicolorida elegante
   const defaultColorPalette = [
     'rgba(255, 107, 107, 0.8)',
     'rgba(78, 205, 196, 0.8)',
     'rgba(69, 183, 209, 0.8)',
     'rgba(150, 206, 180, 0.8)',
-    'rgba(249, 210, 118, 0.8)',
-    'rgba(255, 204, 92, 0.8)',
-    'rgba(255, 111, 105, 0.8)',
-    'rgba(136, 216, 176, 0.8)',
-    'rgba(181, 234, 215, 0.8)',
-    'rgba(199, 206, 234, 0.8)'
+    'rgba(249, 210, 118, 0.8)'
   ];
   
   const defaultBorderColorPalette = [
@@ -1664,12 +1400,7 @@ function upsertPie(id,labels,data,extra){
     'rgb(78, 205, 196)',
     'rgb(69, 183, 209)',
     'rgb(150, 206, 180)',
-    'rgb(249, 210, 118)',
-    'rgb(255, 204, 92)',
-    'rgb(255, 111, 105)',
-    'rgb(136, 216, 176)',
-    'rgb(181, 234, 215)',
-    'rgb(199, 206, 234)'
+    'rgb(249, 210, 118)'
   ];
   
   const colorPalette = extra?.colorPalette || defaultColorPalette;
@@ -1702,8 +1433,6 @@ function upsertPie(id,labels,data,extra){
           borderWidth: 1,
           cornerRadius: 8,
           displayColors: true,
-          boxPadding: 6,
-          usePointStyle: true,
           callbacks: {
             label: function(context) {
               const label = context.label || '';
@@ -1726,55 +1455,6 @@ function upsertPie(id,labels,data,extra){
   });
 }
 
-/* ================= PDF ================= */
-function exportTablePDF(title, tableSelector, chartId){
-  const table=$(tableSelector);
-  const head=Array.from(table.querySelectorAll('thead th')).map(th=>th.innerText);
-  const rows=Array.from(table.querySelectorAll('tbody tr:not(.details-row)')).map(tr=>Array.from(tr.children).map(td=>td.innerText.replace(/\n/g, ' ').trim()));
-
-  let img=null;
-  if(chartId && charts[chartId]) img = charts[chartId].toBase64Image();
-
-  const docDef={
-    pageSize:'A4', pageMargins:[24,24,24,24],
-    content:[
-      { text:title, style:'title' },
-      { text:new Date().toLocaleString('pt-BR'), style:'sub', margin:[0,0,0,6] },
-      img ? { image:img, width:480, margin:[0,0,0,12] } : {},
-      { table:{ headerRows:1, widths:head.map(()=>'*'), body:[ head, ...rows ] }, layout:'lightHorizontalLines' }
-    ],
-    styles:{ title:{fontSize:16,bold:true,color:'#2e7d32'}, sub:{fontSize:9,color:'#666'} }
-  };
-  pdfMake.createPdf(docDef).download(`${title.toLowerCase().replace(/[^a-z0-9]+/g,'_')}.pdf`);
-}
-
-// Event listeners para botões PDF
-document.getElementById('btnPDFCluster').addEventListener('click',()=>exportTablePDF('Incidentes por Cluster','#tblCluster','chartCluster'));
-document.getElementById('btnPDFCidade').addEventListener('click',()=>exportTablePDF('Incidentes por Cidade','#tblCidade','chartCidade'));
-document.getElementById('btnPDFQOE').addEventListener('click',()=>exportTablePDF('QOE Pré vs Pós','#tblQoeNode',null));
-document.getElementById('btnPDFFechamento').addEventListener('click',()=>exportTablePDF('Tipo de Fechamento','#tblFechamento','chartFechamento'));
-document.getElementById('btnPDFReinc').addEventListener('click',()=>exportTablePDF('Log de Reincidência','#tblReinc',null));
-document.getElementById('btnPDFResumo').addEventListener('click',()=>{
-  const byCluster=groupBy(RAW,'Cluster');
-  const head=['Cluster','Incidentes','Δ QOE','Taxa Reinc.'];
-  const body=Object.entries(byCluster).map(([cl,rows])=>{
-    const total=rows.length, nodes=groupBy(rows,'Node');
-    const reinc=Object.values(nodes).filter(a=>a.length>1).length;
-    const taxa=total?(reinc/Object.keys(nodes).length*100):0;
-    const varPct=aggregateQoe(rows,['Cluster'])[0]?.varPct||0;
-    return [ cl, String(total), fmtPct(varPct), fmtPct(taxa) ];
-  });
-  const docDef={ pageSize:'A4', pageMargins:[24,24,24,24],
-    content:[
-      { text:'Dashboard Resumo', style:'title' },
-      { text:new Date().toLocaleString('pt-BR'), style:'sub', margin:[0,0,0,6] },
-      { table:{ headerRows:1, widths:['*','auto','auto','auto'], body:[ head, ...body ] }, layout:'lightHorizontalLines' }
-    ],
-    styles:{ title:{fontSize:16,bold:true,color:'#2e7d32'}, sub:{fontSize:9,color:'#666'} }
-  };
-  pdfMake.createPdf(docDef).download('dashboard_resumo.pdf');
-});
-
 /* ================= Utils ================= */
 function groupBy(a,k){ 
   return a.reduce((acc, current) => {
@@ -1785,6 +1465,24 @@ function groupBy(a,k){
     acc[groupKey].push(current);
     return acc;
   }, {});
+}
+
+function formatarData(data) {
+  if (!data || !(data instanceof Date) || isNaN(data.getTime())) {
+    return '(sem data)';
+  }
+  
+  try {
+    return data.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    return '(erro na data)';
+  }
 }
 
 /* ================= UI Helpers ================= */
@@ -1853,11 +1551,6 @@ function renderAll(){
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-  });
-  
   document.getElementById('btnVoltarCluster').style.display = 'none';
   
   document.getElementById('btnVoltarCluster').addEventListener('click', function() {
