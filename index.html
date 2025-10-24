@@ -442,7 +442,65 @@
       color: #555;
       font-weight: 500;
     }
-    
+
+    /* Indicador de dados carregados */
+    .data-indicator {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 8px 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Cabeçalhos ordenáveis */
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+    }
+
+    .sortable-header:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+    }
+
+    .sortable-header.sorted-asc::after {
+      content: " ↑";
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .sortable-header.sorted-desc::after {
+      content: " ↓";
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* Campo de busca */
+    .search-box {
+      position: relative;
+    }
+
+    .search-box .form-control {
+      padding-left: 40px;
+    }
+
+    .search-box .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         min-height: auto;
@@ -467,6 +525,13 @@
         width: 90%;
         border-radius: 8px;
       }
+
+      .data-indicator {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 10px 0;
+      }
     }
   </style>
 </head>
@@ -476,6 +541,12 @@
     <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Análise de Incidentes</h1>
   </div>
 </header>
+
+<!-- Indicador de dados carregados -->
+<div id="dataIndicator" class="data-indicator" style="display: none;">
+  <i class="bi bi-database me-2"></i>
+  <span id="dataCount">0</span> incidentes carregados
+</div>
 
 <div class="container-fluid">
   <div class="row">
@@ -529,8 +600,8 @@
                   <table class="table table-sm table-hover" id="tblCluster">
                     <thead class="table-light">
                       <tr>
-                        <th>Cluster</th>
-                        <th class="text-end">Incidentes</th>
+                        <th class="sortable-header">Cluster</th>
+                        <th class="sortable-header text-end">Incidentes</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -566,8 +637,8 @@
                   <table class="table table-sm table-hover" id="tblCidade">
                     <thead class="table-light">
                       <tr>
-                        <th>Cidade</th>
-                        <th class="text-end">Incidentes</th>
+                        <th class="sortable-header">Cidade</th>
+                        <th class="sortable-header text-end">Incidentes</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -597,25 +668,27 @@
             <div class="col-12">
               <div class="card-custom p-3">
                 <div class="row align-items-center">
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                     <label class="form-label fw-semibold">Filtrar por Cluster:</label>
                     <select class="form-select" id="filtroClusterQOE">
                       <option value="">Todos os Clusters</option>
                     </select>
                   </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-semibold">Filtrar por Cidade:</label>
-                    <select class="form-select" id="filtroCidadeQOE">
-                      <option value="">Todas as Cidades</option>
-                    </select>
-                  </div>
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                     <label class="form-label fw-semibold">Filtrar por Produtividade:</label>
                     <select class="form-select" id="filtroProdutividadeQOE">
                       <option value="todos">Todos os Incidentes</option>
                       <option value="produtivo">Apenas Produtivos</option>
                       <option value="improdutivo">Apenas Improdutivos</option>
                     </select>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-12">
+                    <div class="search-box">
+                      <i class="bi bi-search search-icon"></i>
+                      <input type="text" class="form-control" id="searchNodeQOE" placeholder="Buscar por Node...">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -627,14 +700,14 @@
               <table class="table table-sm table-hover" id="tblQoeNode">
                 <thead class="table-light">
                   <tr>
-                    <th>Node</th>
-                    <th>Cluster</th>
-                    <th>Cidade</th>
-                    <th class="text-end"><strong>Pré</strong></th>
-                    <th class="text-end"><strong>Pós</strong></th>
-                    <th class="text-end"><strong>QOE 24h</strong></th>
-                    <th class="text-end">Melhoria %</th>
-                    <th>Status</th>
+                    <th class="sortable-header">Node</th>
+                    <th class="sortable-header">Cluster</th>
+                    <th class="sortable-header">Cidade</th>
+                    <th class="sortable-header text-end"><strong>Pré</strong></th>
+                    <th class="sortable-header text-end"><strong>Pós</strong></th>
+                    <th class="sortable-header text-end"><strong>QOE 24h</strong></th>
+                    <th class="sortable-header text-end">Melhoria %</th>
+                    <th class="sortable-header">Status</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -694,9 +767,9 @@
                   <table class="table table-sm table-hover" id="tblFechamento">
                     <thead class="table-light">
                       <tr>
-                        <th>Tipo</th>
-                        <th class="text-end">Volume</th>
-                        <th class="text-end">% </th>
+                        <th class="sortable-header">Tipo</th>
+                        <th class="sortable-header text-end">Volume</th>
+                        <th class="sortable-header text-end">% </th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -720,10 +793,10 @@
               <table class="table table-sm table-hover" id="tblReinc">
                 <thead class="table-light">
                   <tr>
-                    <th>Node</th>
-                    <th>Cluster</th>
-                    <th>Cidade</th>
-                    <th class="text-center">Ocorrências</th>
+                    <th class="sortable-header">Node</th>
+                    <th class="sortable-header">Cluster</th>
+                    <th class="sortable-header">Cidade</th>
+                    <th class="sortable-header text-center">Ocorrências</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -793,7 +866,7 @@ let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
 let filtroProdutividade = 'todos';
 let filtroClusterQOE = '';
-let filtroCidadeQOE = '';
+let currentSort = { column: null, direction: 'asc' };
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
 function classificarProdutividade(solucao) {
@@ -803,8 +876,8 @@ function classificarProdutividade(solucao) {
   const termosImprodutivos = [
     'n. s intervenção',
     'n. s intervencao',
-    'n. sem intervenção',  // NOVO TERMO ADICIONADO
-    'n. sem intervencao',  // NOVO TERMO ADICIONADO
+    'n. sem intervenção',
+    'n. sem intervencao',
     'n. durante a identificação',
     'n. durante a identificacao',
     'cleardate'
@@ -862,15 +935,18 @@ function obterDadosFiltradosQOE() {
     dadosFiltrados = dadosFiltrados.filter(row => row.Cluster === filtroClusterQOE);
   }
   
-  // Aplicar filtro de cidade para QOE
-  if (filtroCidadeQOE) {
-    dadosFiltrados = dadosFiltrados.filter(row => row.Cidade === filtroCidadeQOE);
-  }
-  
   // Aplicar filtro de produtividade para QOE
   const filtroProdutividadeQOE = $('#filtroProdutividadeQOE').value;
   if (filtroProdutividadeQOE !== 'todos') {
     dadosFiltrados = dadosFiltrados.filter(row => classificarProdutividade(row.SOLUÇÃO) === filtroProdutividadeQOE);
+  }
+  
+  // Aplicar busca por Node
+  const searchTerm = $('#searchNodeQOE').value.toLowerCase().trim();
+  if (searchTerm) {
+    dadosFiltrados = dadosFiltrados.filter(row => 
+      row.Node.toLowerCase().includes(searchTerm)
+    );
   }
   
   return dadosFiltrados;
@@ -883,12 +959,75 @@ function atualizarFiltrosQOE() {
   const selectCluster = $('#filtroClusterQOE');
   selectCluster.innerHTML = '<option value="">Todos os Clusters</option>' + 
     clusters.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+/* ================= Ordenação de Tabelas ================= */
+function initSorting() {
+  // Adicionar event listeners para todos os cabeçalhos ordenáveis
+  $$('.sortable-header').forEach(header => {
+    header.addEventListener('click', function() {
+      const table = this.closest('table');
+      const columnIndex = Array.from(this.parentElement.children).indexOf(this);
+      const columnName = this.textContent.trim();
+      
+      sortTable(table, columnIndex, columnName);
+    });
+  });
+}
+
+function sortTable(table, columnIndex, columnName) {
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
   
-  // Atualizar filtro de cidades
-  const cidades = [...new Set(RAW.map(r => r.Cidade))].sort();
-  const selectCidade = $('#filtroCidadeQOE');
-  selectCidade.innerHTML = '<option value="">Todas as Cidades</option>' + 
-    cidades.map(c => `<option value="${c}">${c}</option>`).join('');
+  // Determinar direção da ordenação
+  const isSameColumn = currentSort.column === columnName;
+  const direction = isSameColumn && currentSort.direction === 'asc' ? 'desc' : 'asc';
+  
+  // Ordenar linhas
+  rows.sort((a, b) => {
+    const aCell = a.cells[columnIndex];
+    const bCell = b.cells[columnIndex];
+    
+    let aValue = aCell.textContent.trim();
+    let bValue = bCell.textContent.trim();
+    
+    // Converter para número se possível
+    if (!isNaN(aValue) && !isNaN(bValue)) {
+      aValue = parseFloat(aValue);
+      bValue = parseFloat(bValue);
+    }
+    
+    if (direction === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+  
+  // Remover linhas existentes
+  rows.forEach(row => tbody.removeChild(row));
+  
+  // Adicionar linhas ordenadas
+  rows.forEach(row => tbody.appendChild(row));
+  
+  // Atualizar estado e indicadores visuais
+  updateSortIndicators(columnName, direction);
+}
+
+function updateSortIndicators(columnName, direction) {
+  // Remover indicadores anteriores
+  $$('.sortable-header').forEach(header => {
+    header.classList.remove('sorted-asc', 'sorted-desc');
+  });
+  
+  // Adicionar indicador atual
+  $$('.sortable-header').forEach(header => {
+    if (header.textContent.trim() === columnName) {
+      header.classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
+  });
+  
+  currentSort = { column: columnName, direction };
 }
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
@@ -1081,7 +1220,13 @@ function handleFile(file){
         
         ['Cluster','Node','Cidade','SOLUÇÃO','INCIDENTE'].forEach(k=>{
           o[k] = String(o[k] || '').trim();
-          if(o[k]==='') o[k]='(não informado)';
+          if(o[k]==='') {
+            if (k === 'SOLUÇÃO') {
+              o[k] = 'Em tratamento'; // Nomear soluções vazias como "Em tratamento"
+            } else {
+              o[k] = '(não informado)';
+            }
+          }
         });
         
         return o;
@@ -1100,11 +1245,17 @@ function handleFile(file){
 
       DATA_ALL=rows; RAW=[...rows];
       
+      // Atualizar indicador de dados carregados
+      updateDataIndicator();
+      
       // Atualizar percentuais de produtividade
       atualizarPercentuais();
       
       // Atualizar filtros da aba QOE
       atualizarFiltrosQOE();
+      
+      // Inicializar ordenação
+      initSorting();
       
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
@@ -1114,6 +1265,19 @@ function handleFile(file){
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+/* ================= Atualizar Indicador de Dados ================= */
+function updateDataIndicator() {
+  const indicator = $('#dataIndicator');
+  const countElement = $('#dataCount');
+  
+  if (RAW.length > 0) {
+    countElement.textContent = RAW.length.toLocaleString('pt-BR');
+    indicator.style.display = 'block';
+  } else {
+    indicator.style.display = 'none';
+  }
 }
 
 /* ================= QOE - COM MELHORIA E STATUS ================= */
@@ -1774,12 +1938,12 @@ document.addEventListener('DOMContentLoaded', function() {
     renderQoe();
   });
   
-  $('#filtroCidadeQOE').addEventListener('change', function() {
-    filtroCidadeQOE = this.value;
+  $('#filtroProdutividadeQOE').addEventListener('change', function() {
     renderQoe();
   });
   
-  $('#filtroProdutividadeQOE').addEventListener('change', function() {
+  // Event listener para busca por Node
+  $('#searchNodeQOE').addEventListener('input', function() {
     renderQoe();
   });
   
