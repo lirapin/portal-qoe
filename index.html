@@ -566,8 +566,6 @@
   </div>
 </header>
 
-<!-- INDICADOR FLUTUANTE REMOVIDO -->
-
 <div class="container-fluid">
   <div class="row">
     <!-- ===== SIDEBAR ===== -->
@@ -947,13 +945,13 @@ function updateCounters() {
   const total = RAW.length;
   const dadosFiltradosQOE = obterDadosFiltradosQOE();
   
-  // Atualizar todos os contadores
+  // Atualizar todos os contadores - AGORA COM ESPAÇO
   $$('.incident-counter span').forEach(span => {
-    span.textContent = total.toLocaleString('pt-BR');
+    span.textContent = total.toLocaleString('pt-BR') + ' incidentes';
   });
   
   // Contador específico para QOE (com filtros aplicados)
-  $('#countQOE').textContent = dadosFiltradosQOE.length.toLocaleString('pt-BR');
+  $('#countQOE').textContent = dadosFiltradosQOE.length.toLocaleString('pt-BR') + ' incidentes';
 }
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
@@ -1140,14 +1138,14 @@ const AUTO_MAP={
   'INCIDENTE':'INCIDENTE',
   'CIDADE':'Cidade',
   'CLUSTER':'Cluster',
-  'HI (DATA E HORA INÍCIO)':'Data',
-  'HI (DATA E HORA INICIO)':'Data',
-  'HI_INICIO':'Data',
-  'HI INICIO':'Data',
-  'HI INÍCIO':'Data',
-  'DATA':'Data',
-  'DATA INICIO':'Data',
-  'DATA INÍCIO':'Data',
+  'HI (DATA E HORA INÍCIO)':'HI_INICIO',
+  'HI (DATA E HORA INICIO)':'HI_INICIO',
+  'HI_INICIO':'HI_INICIO',
+  'HI INICIO':'HI_INICIO',
+  'HI INÍCIO':'HI_INICIO',
+  'DATA':'HI_INICIO', // PRIORIZAR HI SOBRE DATA
+  'DATA INICIO':'HI_INICIO',
+  'DATA INÍCIO':'HI_INICIO',
   'NODE':'Node',
   'NÓ':'Node',
   'QOE PRÉ':'QOE_Pre',
@@ -1228,6 +1226,10 @@ function validarData(dataStr) {
       let mes = parseInt(partes[1]) - 1;
       let ano = parseInt(partes[2]);
       
+      if (ano < 100) {
+        ano += 2000;
+      }
+      
       if (mes > 11) {
         [dia, mes] = [mes + 1, dia - 1];
       }
@@ -1238,6 +1240,10 @@ function validarData(dataStr) {
   }
   
   data = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'));
+  if (!isNaN(data.getTime())) return data;
+  
+  // Tentar outros formatos comuns
+  data = new Date(dataStr.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
   if (!isNaN(data.getTime())) return data;
   
   return null;
@@ -1311,7 +1317,8 @@ function handleFile(file){
           }
         });
         
-        o['Data'] = validarData(String(o['Data'] || ''));
+        // VALIDAR DATA DO HI (QUANDO INCIDENTE CAIU)
+        o['HI_INICIO'] = validarData(String(o['HI_INICIO'] || ''));
         
         ['QOE_Pre', 'QOE_Pos', 'QOE_24h'].forEach(key => {
           if (o[key] !== undefined) {
@@ -1588,7 +1595,7 @@ function renderReinc(){
       Count: l.length,
       Incidents: l.map(x => ({
         solucao: x.SOLUÇÃO || '(SEM SOLUÇÃO)',
-        data: x.Data ? formatarData(x.Data) : '(SEM DATA)',
+        data: x.HI_INICIO ? formatarData(x.HI_INICIO) : '(SEM DATA)', // USANDO HI_INICIO AGORA
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
@@ -1722,36 +1729,52 @@ function toggleDetalhesNode(tr, nodeData){
 function renderResumo(){
   const dadosFiltrados = obterDadosFiltrados();
   const byCluster=groupBy(dadosFiltrados,'Cluster');
-  const wrap=$('#cardsResumo'); wrap.innerHTML='';
-  Object.entries(byCluster).forEach(([cl,rows], index) => {
-    const total=rows.length;
-    const nodes=groupBy(rows,'Node');
-    const reinc=Object.values(nodes).filter(a=>a.length>1).length;
-    const taxa=total?(reinc/Object.keys(nodes).length*100):0;
+  
+  // ORDENAR DO PIOR PARA O MELHOR (MAIOR TAXA DE REINCIDÊNCIA PRIMEIRO)
+  const clustersOrdenados = Object.entries(byCluster)
+    .map(([cl,rows]) => {
+      const total=rows.length;
+      const nodes=groupBy(rows,'Node');
+      const reinc=Object.values(nodes).filter(a=>a.length>1).length;
+      const taxa=total?(reinc/Object.keys(nodes).length*100):0;
+      
+      return {
+        cluster: cl,
+        total: total,
+        taxa: taxa,
+        reinc: reinc,
+        nodes: Object.keys(nodes).length
+      };
+    })
+    .sort((a, b) => b.taxa - a.taxa); // ORDENAÇÃO DO MAIOR PARA O MENOR
 
+  const wrap=$('#cardsResumo'); 
+  wrap.innerHTML='';
+  
+  clustersOrdenados.forEach((cl, index) => {
     const card=document.createElement('div'); 
     card.className='col-12 col-md-6 col-lg-4';
     card.style.animationDelay = `${index * 0.1}s`;
     card.innerHTML = `
       <div class="card-custom h-100 p-4">
         <div class="card-body p-0">
-          <h5 class="mb-3 section-title">${cl}</h5>
+          <h5 class="mb-3 section-title">${cl.cluster}</h5>
           <div class="d-flex align-items-center mb-3">
             <div class="me-3">
               <i class="bi bi-exclamation-circle fs-4 text-primary"></i>
             </div>
             <div>
               <div class="text-muted small">Total de Incidentes</div>
-              <div class="h4 mb-0 fw-bold">${total}</div>
+              <div class="h4 mb-0 fw-bold">${cl.total}</div>
             </div>
           </div>
           <div class="d-flex align-items-center">
             <div class="me-3">
-              <i class="bi bi-clock-history fs-4 ${taxa>20?'text-danger':'text-info'}"></i>
+              <i class="bi bi-clock-history fs-4 ${cl.taxa>20?'text-danger':'text-info'}"></i>
             </div>
             <div>
               <div class="text-muted small">Taxa de Reincidência</div>
-              <div class="h5 mb-0 ${taxa>20?'text-danger':'text-info'}">${taxa.toFixed(1)}%</div>
+              <div class="h5 mb-0 ${cl.taxa>20?'text-danger':'text-info'}">${cl.taxa.toFixed(1)}%</div>
             </div>
           </div>
         </div>
