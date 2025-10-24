@@ -502,6 +502,25 @@
       color: var(--text-muted);
     }
 
+    /* Contador de incidentes fixo */
+    .incident-counter {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 6px 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--glass-border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .incident-counter i {
+      margin-right: 5px;
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         min-height: auto;
@@ -532,6 +551,11 @@
         top: auto;
         right: auto;
         margin: 10px 0;
+      }
+
+      .incident-counter {
+        margin-right: 5px;
+        margin-bottom: 10px;
       }
     }
   </style>
@@ -590,9 +614,15 @@
         <section class="tab-pane fade show active" id="tabCluster">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Incidentes por Cluster</h5>
-            <button class="btn btn-primary btn-sm" id="btnPDFCluster">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterCluster">
+                <i class="bi bi-database"></i>
+                <span id="countCluster">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFCluster">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           <div class="row">
             <div class="col-12 col-lg-5 mb-4">
@@ -627,9 +657,15 @@
               </button>
               <h5 class="m-0 section-title" id="tituloCidade">Incidentes por Cidade</h5>
             </div>
-            <button class="btn btn-primary btn-sm" id="btnPDFCidade">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterCidade">
+                <i class="bi bi-database"></i>
+                <span id="countCidade">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFCidade">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           <div class="row">
             <div class="col-12 col-lg-5 mb-4">
@@ -659,9 +695,15 @@
         <section class="tab-pane fade" id="tabQOE">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">QOE Pré vs Pós</h5>
-            <button class="btn btn-primary btn-sm" id="btnPDFQOE">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterQOE">
+                <i class="bi bi-database"></i>
+                <span id="countQOE">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFQOE">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           
           <!-- Filtros para QOE -->
@@ -721,9 +763,15 @@
         <section class="tab-pane fade" id="tabFechamento">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Tipo de Fechamento</h5>
-            <button class="btn btn-primary btn-sm" id="btnPDFFechamento">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterFechamento">
+                <i class="bi bi-database"></i>
+                <span id="countFechamento">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFFechamento">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           
           <!-- Filtro de Produtividade -->
@@ -785,9 +833,15 @@
         <section class="tab-pane fade" id="tabReinc">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Log de Reincidência</h5>
-            <button class="btn btn-primary btn-sm" id="btnPDFReinc">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterReinc">
+                <i class="bi bi-database"></i>
+                <span id="countReinc">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFReinc">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           <div class="card-custom p-4">
             <div class="table-responsive">
@@ -810,9 +864,15 @@
         <section class="tab-pane fade" id="tabResumo">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Dashboard Resumo</h5>
-            <button class="btn btn-primary btn-sm" id="btnPDFResumo">
-              <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
-            </button>
+            <div class="d-flex align-items-center">
+              <span class="incident-counter" id="counterResumo">
+                <i class="bi bi-database"></i>
+                <span id="countResumo">0</span> incidentes
+              </span>
+              <button class="btn btn-primary btn-sm" id="btnPDFResumo">
+                <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
+              </button>
+            </div>
           </div>
           
           <!-- Filtro de Produtividade no Dashboard -->
@@ -868,6 +928,21 @@ let selectedCluster = null;
 let filtroProdutividade = 'todos';
 let filtroClusterQOE = '';
 let currentSort = { column: null, direction: 'asc' };
+
+/* ================= Atualizar Contadores ================= */
+function updateCounters() {
+  const total = RAW.length;
+  const dadosFiltrados = obterDadosFiltrados();
+  const dadosFiltradosQOE = obterDadosFiltradosQOE();
+  
+  // Atualizar todos os contadores
+  $$('.incident-counter span').forEach(span => {
+    span.textContent = total.toLocaleString('pt-BR');
+  });
+  
+  // Contador específico para QOE (com filtros aplicados)
+  $('#countQOE').textContent = dadosFiltradosQOE.length.toLocaleString('pt-BR');
+}
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
 function classificarProdutividade(solucao) {
@@ -1250,21 +1325,21 @@ function handleFile(file){
         });
         
         ['Cluster','Node','Cidade','SOLUÇÃO','INCIDENTE'].forEach(k=>{
-          o[k] = String(o[k] || '').trim();
+          o[k] = String(o[k] || '').trim().toUpperCase(); // CONVERTER PARA MAIÚSCULAS
           if(o[k]==='') {
             if (k === 'SOLUÇÃO') {
-              o[k] = 'Em tratamento'; // Nomear soluções vazias como "Em tratamento"
+              o[k] = 'EM TRATAMENTO'; // ALTERADO PARA MAIÚSCULAS
             } else {
-              o[k] = '(não informado)';
+              o[k] = '(NÃO INFORMADO)'; // ALTERADO PARA MAIÚSCULAS
             }
           }
         });
         
         return o;
       }).filter(row => 
-        row.Cluster !== '(não informado)' || 
-        row.Node !== '(não informado)' || 
-        row.Cidade !== '(não informado)' ||
+        row.Cluster !== '(NÃO INFORMADO)' || 
+        row.Node !== '(NÃO INFORMADO)' || 
+        row.Cidade !== '(NÃO INFORMADO)' ||
         row.QOE_Pre > 0 || 
         row.QOE_Pos > 0
       );
@@ -1278,6 +1353,9 @@ function handleFile(file){
       
       // Atualizar indicador de dados carregados
       updateDataIndicator();
+      
+      // Atualizar contadores
+      updateCounters();
       
       // Atualizar percentuais de produtividade
       atualizarPercentuais();
@@ -1513,8 +1591,8 @@ function renderReinc(){
       Cidade: l[0].Cidade, 
       Count: l.length,
       Incidents: l.map(x => ({
-        solucao: x.SOLUÇÃO || '(sem solução)',
-        data: x.Data ? formatarData(x.Data) : '(sem data)',
+        solucao: x.SOLUÇÃO || '(SEM SOLUÇÃO)',
+        data: x.Data ? formatarData(x.Data) : '(SEM DATA)',
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
@@ -1844,7 +1922,7 @@ function upsertPie(id,labels,data,extra){
 /* ================= Utils ================= */
 function groupBy(a,k){ 
   return a.reduce((acc, current) => {
-    const groupKey = current[k] || '(não informado)';
+    const groupKey = current[k] || '(NÃO INFORMADO)';
     if (!acc[groupKey]) {
       acc[groupKey] = [];
     }
@@ -1855,7 +1933,7 @@ function groupBy(a,k){
 
 function formatarData(data) {
   if (!data || !(data instanceof Date) || isNaN(data.getTime())) {
-    return '(sem data)';
+    return '(SEM DATA)';
   }
   
   try {
@@ -1867,7 +1945,7 @@ function formatarData(data) {
       minute: '2-digit'
     });
   } catch (error) {
-    return '(erro na data)';
+    return '(ERRO NA DATA)';
   }
 }
 
@@ -1943,26 +2021,31 @@ document.addEventListener('DOMContentLoaded', function() {
   $('#filtroProdutividade').addEventListener('change', function() {
     filtroProdutividade = this.value;
     renderAll();
+    updateCounters();
   });
   
   $('#filtroProdutividadeDashboard').addEventListener('change', function() {
     filtroProdutividade = this.value;
     renderAll();
+    updateCounters();
   });
   
   // Event listeners para filtros da aba QOE
   $('#filtroClusterQOE').addEventListener('change', function() {
     filtroClusterQOE = this.value;
     renderQoe();
+    updateCounters();
   });
   
   $('#filtroProdutividadeQOE').addEventListener('change', function() {
     renderQoe();
+    updateCounters();
   });
   
   // Event listener para busca por Node
   $('#searchNodeQOE').addEventListener('input', function() {
     renderQoe();
+    updateCounters();
   });
   
   document.getElementById('btnVoltarCluster').addEventListener('click', function() {
