@@ -591,6 +591,37 @@
               <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
             </button>
           </div>
+          
+          <!-- Filtros para QOE -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card-custom p-3">
+                <div class="row align-items-center">
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Filtrar por Cluster:</label>
+                    <select class="form-select" id="filtroClusterQOE">
+                      <option value="">Todos os Clusters</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Filtrar por Cidade:</label>
+                    <select class="form-select" id="filtroCidadeQOE">
+                      <option value="">Todas as Cidades</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Filtrar por Produtividade:</label>
+                    <select class="form-select" id="filtroProdutividadeQOE">
+                      <option value="todos">Todos os Incidentes</option>
+                      <option value="produtivo">Apenas Produtivos</option>
+                      <option value="improdutivo">Apenas Improdutivos</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="card-custom p-4">
             <div class="table-responsive">
               <table class="table table-sm table-hover" id="tblQoeNode">
@@ -761,6 +792,8 @@ const $=(s,c=document)=>c.querySelector(s);
 let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
 let filtroProdutividade = 'todos';
+let filtroClusterQOE = '';
+let filtroCidadeQOE = '';
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
 function classificarProdutividade(solucao) {
@@ -769,7 +802,9 @@ function classificarProdutividade(solucao) {
   // Verificar se a solução contém algum dos termos improdutivos
   const termosImprodutivos = [
     'n. s intervenção',
-    'n. s intervencao', 
+    'n. s intervencao',
+    'n. sem intervenção',  // NOVO TERMO ADICIONADO
+    'n. sem intervencao',  // NOVO TERMO ADICIONADO
     'n. durante a identificação',
     'n. durante a identificacao',
     'cleardate'
@@ -809,9 +844,51 @@ function atualizarPercentuais() {
 }
 
 function obterDadosFiltrados() {
-  if (filtroProdutividade === 'todos') return RAW;
+  let dadosFiltrados = RAW;
   
-  return RAW.filter(row => classificarProdutividade(row.SOLUÇÃO) === filtroProdutividade);
+  // Aplicar filtro de produtividade
+  if (filtroProdutividade !== 'todos') {
+    dadosFiltrados = dadosFiltrados.filter(row => classificarProdutividade(row.SOLUÇÃO) === filtroProdutividade);
+  }
+  
+  return dadosFiltrados;
+}
+
+function obterDadosFiltradosQOE() {
+  let dadosFiltrados = RAW;
+  
+  // Aplicar filtro de cluster para QOE
+  if (filtroClusterQOE) {
+    dadosFiltrados = dadosFiltrados.filter(row => row.Cluster === filtroClusterQOE);
+  }
+  
+  // Aplicar filtro de cidade para QOE
+  if (filtroCidadeQOE) {
+    dadosFiltrados = dadosFiltrados.filter(row => row.Cidade === filtroCidadeQOE);
+  }
+  
+  // Aplicar filtro de produtividade para QOE
+  const filtroProdutividadeQOE = $('#filtroProdutividadeQOE').value;
+  if (filtroProdutividadeQOE !== 'todos') {
+    dadosFiltrados = dadosFiltrados.filter(row => classificarProdutividade(row.SOLUÇÃO) === filtroProdutividadeQOE);
+  }
+  
+  return dadosFiltrados;
+}
+
+/* ================= Atualizar Filtros QOE ================= */
+function atualizarFiltrosQOE() {
+  // Atualizar filtro de clusters
+  const clusters = [...new Set(RAW.map(r => r.Cluster))].sort();
+  const selectCluster = $('#filtroClusterQOE');
+  selectCluster.innerHTML = '<option value="">Todos os Clusters</option>' + 
+    clusters.map(c => `<option value="${c}">${c}</option>`).join('');
+  
+  // Atualizar filtro de cidades
+  const cidades = [...new Set(RAW.map(r => r.Cidade))].sort();
+  const selectCidade = $('#filtroCidadeQOE');
+  selectCidade.innerHTML = '<option value="">Todas as Cidades</option>' + 
+    cidades.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
@@ -1026,6 +1103,9 @@ function handleFile(file){
       // Atualizar percentuais de produtividade
       atualizarPercentuais();
       
+      // Atualizar filtros da aba QOE
+      atualizarFiltrosQOE();
+      
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
     }catch(err){
@@ -1045,7 +1125,7 @@ function colorByValue(v){
 }
 
 function renderQoe(){
-  const dadosFiltrados = obterDadosFiltrados();
+  const dadosFiltrados = obterDadosFiltradosQOE();
   const arr = aggregateQoe(dadosFiltrados, ['Node','Cluster','Cidade']);
   $('#tblQoeNode tbody').innerHTML = arr.map(r => {
     // Calcular melhoria e status
@@ -1686,6 +1766,21 @@ document.addEventListener('DOMContentLoaded', function() {
   $('#filtroProdutividadeDashboard').addEventListener('change', function() {
     filtroProdutividade = this.value;
     renderAll();
+  });
+  
+  // Event listeners para filtros da aba QOE
+  $('#filtroClusterQOE').addEventListener('change', function() {
+    filtroClusterQOE = this.value;
+    renderQoe();
+  });
+  
+  $('#filtroCidadeQOE').addEventListener('change', function() {
+    filtroCidadeQOE = this.value;
+    renderQoe();
+  });
+  
+  $('#filtroProdutividadeQOE').addEventListener('change', function() {
+    renderQoe();
   });
   
   document.getElementById('btnVoltarCluster').addEventListener('click', function() {
