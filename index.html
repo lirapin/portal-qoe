@@ -48,7 +48,7 @@
       line-height: 1.6;
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 50px; /* Espaço para a assinatura */
+      padding-bottom: 50px;
     }
     
     .app-header {
@@ -465,6 +465,7 @@
       cursor: pointer;
       user-select: none;
       transition: all 0.3s ease;
+      position: relative;
     }
 
     .sortable-header:hover {
@@ -600,8 +601,8 @@
                   <table class="table table-sm table-hover" id="tblCluster">
                     <thead class="table-light">
                       <tr>
-                        <th class="sortable-header">Cluster</th>
-                        <th class="sortable-header text-end">Incidentes</th>
+                        <th class="sortable-header" data-column="cluster">Cluster</th>
+                        <th class="sortable-header text-end" data-column="count">Incidentes</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -637,8 +638,8 @@
                   <table class="table table-sm table-hover" id="tblCidade">
                     <thead class="table-light">
                       <tr>
-                        <th class="sortable-header">Cidade</th>
-                        <th class="sortable-header text-end">Incidentes</th>
+                        <th class="sortable-header" data-column="cidade">Cidade</th>
+                        <th class="sortable-header text-end" data-column="count">Incidentes</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -700,14 +701,14 @@
               <table class="table table-sm table-hover" id="tblQoeNode">
                 <thead class="table-light">
                   <tr>
-                    <th class="sortable-header">Node</th>
-                    <th class="sortable-header">Cluster</th>
-                    <th class="sortable-header">Cidade</th>
-                    <th class="sortable-header text-end"><strong>Pré</strong></th>
-                    <th class="sortable-header text-end"><strong>Pós</strong></th>
-                    <th class="sortable-header text-end"><strong>QOE 24h</strong></th>
-                    <th class="sortable-header text-end">Melhoria %</th>
-                    <th class="sortable-header">Status</th>
+                    <th class="sortable-header" data-column="node">Node</th>
+                    <th class="sortable-header" data-column="cluster">Cluster</th>
+                    <th class="sortable-header" data-column="cidade">Cidade</th>
+                    <th class="sortable-header text-end" data-column="pre"><strong>Pré</strong></th>
+                    <th class="sortable-header text-end" data-column="pos"><strong>Pós</strong></th>
+                    <th class="sortable-header text-end" data-column="qoe24h"><strong>QOE 24h</strong></th>
+                    <th class="sortable-header text-end" data-column="melhoria">Melhoria %</th>
+                    <th class="sortable-header" data-column="status">Status</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -767,9 +768,9 @@
                   <table class="table table-sm table-hover" id="tblFechamento">
                     <thead class="table-light">
                       <tr>
-                        <th class="sortable-header">Tipo</th>
-                        <th class="sortable-header text-end">Volume</th>
-                        <th class="sortable-header text-end">% </th>
+                        <th class="sortable-header" data-column="tipo">Tipo</th>
+                        <th class="sortable-header text-end" data-column="volume">Volume</th>
+                        <th class="sortable-header text-end" data-column="percentual">% </th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -793,10 +794,10 @@
               <table class="table table-sm table-hover" id="tblReinc">
                 <thead class="table-light">
                   <tr>
-                    <th class="sortable-header">Node</th>
-                    <th class="sortable-header">Cluster</th>
-                    <th class="sortable-header">Cidade</th>
-                    <th class="sortable-header text-center">Ocorrências</th>
+                    <th class="sortable-header" data-column="node">Node</th>
+                    <th class="sortable-header" data-column="cluster">Cluster</th>
+                    <th class="sortable-header" data-column="cidade">Cidade</th>
+                    <th class="sortable-header text-center" data-column="ocorrencias">Ocorrências</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -967,15 +968,14 @@ function initSorting() {
   $$('.sortable-header').forEach(header => {
     header.addEventListener('click', function() {
       const table = this.closest('table');
-      const columnIndex = Array.from(this.parentElement.children).indexOf(this);
-      const columnName = this.textContent.trim();
+      const columnName = this.getAttribute('data-column');
       
-      sortTable(table, columnIndex, columnName);
+      sortTable(table, columnName);
     });
   });
 }
 
-function sortTable(table, columnIndex, columnName) {
+function sortTable(table, columnName) {
   const tbody = table.querySelector('tbody');
   const rows = Array.from(tbody.querySelectorAll('tr'));
   
@@ -985,16 +985,32 @@ function sortTable(table, columnIndex, columnName) {
   
   // Ordenar linhas
   rows.sort((a, b) => {
-    const aCell = a.cells[columnIndex];
-    const bCell = b.cells[columnIndex];
+    let aValue, bValue;
     
-    let aValue = aCell.textContent.trim();
-    let bValue = bCell.textContent.trim();
-    
-    // Converter para número se possível
-    if (!isNaN(aValue) && !isNaN(bValue)) {
-      aValue = parseFloat(aValue);
-      bValue = parseFloat(bValue);
+    // Obter valores baseados na coluna
+    switch(columnName) {
+      case 'cluster':
+      case 'cidade':
+      case 'node':
+      case 'tipo':
+      case 'status':
+        aValue = a.cells[Array.from(a.cells).findIndex(cell => cell.textContent.includes(a.querySelector('td').textContent))].textContent.trim();
+        bValue = b.cells[Array.from(b.cells).findIndex(cell => cell.textContent.includes(b.querySelector('td').textContent))].textContent.trim();
+        break;
+      case 'count':
+      case 'volume':
+      case 'percentual':
+      case 'pre':
+      case 'pos':
+      case 'qoe24h':
+      case 'melhoria':
+      case 'ocorrencias':
+        aValue = parseFloat(a.cells[Array.from(a.cells).findIndex(cell => cell.classList.contains('text-end'))].textContent.replace('%', '').replace('—', '0')) || 0;
+        bValue = parseFloat(b.cells[Array.from(b.cells).findIndex(cell => cell.classList.contains('text-end'))].textContent.replace('%', '').replace('—', '0')) || 0;
+        break;
+      default:
+        aValue = a.cells[0].textContent.trim();
+        bValue = b.cells[0].textContent.trim();
     }
     
     if (direction === 'asc') {
@@ -1005,7 +1021,9 @@ function sortTable(table, columnIndex, columnName) {
   });
   
   // Remover linhas existentes
-  rows.forEach(row => tbody.removeChild(row));
+  while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
+  }
   
   // Adicionar linhas ordenadas
   rows.forEach(row => tbody.appendChild(row));
@@ -1022,12 +1040,25 @@ function updateSortIndicators(columnName, direction) {
   
   // Adicionar indicador atual
   $$('.sortable-header').forEach(header => {
-    if (header.textContent.trim() === columnName) {
+    if (header.getAttribute('data-column') === columnName) {
       header.classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
     }
   });
   
   currentSort = { column: columnName, direction };
+}
+
+/* ================= Atualizar Indicador de Dados ================= */
+function updateDataIndicator() {
+  const indicator = $('#dataIndicator');
+  const countElement = $('#dataCount');
+  
+  if (RAW.length > 0) {
+    countElement.textContent = RAW.length.toLocaleString('pt-BR');
+    indicator.style.display = 'block';
+  } else {
+    indicator.style.display = 'none';
+  }
 }
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
@@ -1265,19 +1296,6 @@ function handleFile(file){
     }
   };
   reader.readAsArrayBuffer(file);
-}
-
-/* ================= Atualizar Indicador de Dados ================= */
-function updateDataIndicator() {
-  const indicator = $('#dataIndicator');
-  const countElement = $('#dataCount');
-  
-  if (RAW.length > 0) {
-    countElement.textContent = RAW.length.toLocaleString('pt-BR');
-    indicator.style.display = 'block';
-  } else {
-    indicator.style.display = 'none';
-  }
 }
 
 /* ================= QOE - COM MELHORIA E STATUS ================= */
