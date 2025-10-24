@@ -698,6 +698,7 @@ const $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
 const $=(s,c=document)=>c.querySelector(s);
 let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
+let filtroTipoProblema = null;
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
 const AUTO_MAP={
@@ -730,7 +731,11 @@ const AUTO_MAP={
   'SOLUCAO':'Tipo_Fechamento',
   'TIPO_FECHAMENTO':'Tipo_Fechamento',
   'TIPO SOLUCAO':'Tipo_Fechamento',
-  'TIPO SOLUÇÃO':'Tipo_Fechamento'
+  'TIPO SOLUÇÃO':'Tipo_Fechamento',
+  'TIPO DE PROBLEMA':'Tipo_Problema',
+  'TIPO PROBLEMA':'Tipo_Problema',
+  'PROBLEMA':'Tipo_Problema',
+  'CATEGORIA PROBLEMA':'Tipo_Problema'
 };
 
 function normalizeHeader(str) {
@@ -887,7 +892,7 @@ function handleFile(file){
           }
         });
         
-        ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
+        ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE','Tipo_Problema'].forEach(k=>{
           o[k] = String(o[k] || '').trim();
           if(o[k]==='') o[k]='(não informado)';
         });
@@ -908,6 +913,9 @@ function handleFile(file){
 
       DATA_ALL=rows; RAW=[...rows];
       
+      // Atualizar filtro de Tipo de Problema
+      atualizarFiltroTipoProblema();
+      
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
     }catch(err){
@@ -916,6 +924,69 @@ function handleFile(file){
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+/* ================= Filtro de Tipo de Problema ================= */
+function atualizarFiltroTipoProblema() {
+  // Verificar se a coluna Tipo_Problema existe nos dados
+  const tiposProblema = [...new Set(RAW.map(r => r.Tipo_Problema || '(não informado)'))].sort();
+  
+  // Criar ou atualizar o filtro na sidebar
+  let filtroContainer = $('#filtroTipoProblema');
+  if (!filtroContainer) {
+    filtroContainer = document.createElement('div');
+    filtroContainer.id = 'filtroTipoProblema';
+    filtroContainer.className = 'mb-4';
+    
+    const uploadDrop = $('#dropArea');
+    uploadDrop.parentNode.insertBefore(filtroContainer, uploadDrop.nextSibling);
+  }
+  
+  filtroContainer.innerHTML = `
+    <div class="mb-2">
+      <label class="form-label fw-semibold small text-muted mb-2">
+        <i class="bi bi-funnel me-1"></i>Filtrar por Tipo de Problema
+      </label>
+      <select class="form-select form-select-sm" id="selectTipoProblema">
+        <option value="">Todos os tipos</option>
+        ${tiposProblema.map(tipo => 
+          `<option value="${tipo}" ${filtroTipoProblema === tipo ? 'selected' : ''}>${tipo}</option>`
+        ).join('')}
+      </select>
+    </div>
+    ${filtroTipoProblema ? `
+      <div class="d-flex align-items-center justify-content-between bg-light rounded p-2 small">
+        <span class="text-muted">Filtro ativo:</span>
+        <span class="badge bg-primary">${filtroTipoProblema}</span>
+        <button class="btn btn-sm btn-outline-danger" id="btnLimparFiltro">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    ` : ''}
+  `;
+  
+  // Adicionar event listeners
+  $('#selectTipoProblema').addEventListener('change', function() {
+    filtroTipoProblema = this.value || null;
+    atualizarFiltroTipoProblema();
+    renderAll();
+  });
+  
+  const btnLimpar = $('#btnLimparFiltro');
+  if (btnLimpar) {
+    btnLimpar.addEventListener('click', function() {
+      filtroTipoProblema = null;
+      $('#selectTipoProblema').value = '';
+      atualizarFiltroTipoProblema();
+      renderAll();
+    });
+  }
+}
+
+/* ================= Obter dados filtrados ================= */
+function obterDadosFiltrados() {
+  if (!filtroTipoProblema) return RAW;
+  return RAW.filter(r => r.Tipo_Problema === filtroTipoProblema);
 }
 
 /* ================= QOE - COM MELHORIA E STATUS ================= */
@@ -927,7 +998,8 @@ function colorByValue(v){
 }
 
 function renderQoe(){
-  const arr = aggregateQoe(RAW, ['Node','Cluster','Cidade']);
+  const dadosFiltrados = obterDadosFiltrados();
+  const arr = aggregateQoe(dadosFiltrados, ['Node','Cluster','Cidade']);
   $('#tblQoeNode tbody').innerHTML = arr.map(r => {
     // Calcular melhoria e status
     const { melhoria, status } = calcularMelhoriaStatus(r.qoePre, r.qoePos, r.qoe24h);
@@ -978,7 +1050,8 @@ function aggregateQoe(rows,keys){
 
 /* ================= Incidentes por Cluster ================= */
 function renderCluster(){
-  const grp={}; RAW.forEach(r=>{grp[r.Cluster]=(grp[r.Cluster]||0)+1});
+  const dadosFiltrados = obterDadosFiltrados();
+  const grp={}; dadosFiltrados.forEach(r=>{grp[r.Cluster]=(grp[r.Cluster]||0)+1});
   const arr=Object.entries(grp).map(([c,v])=>({c,v})).sort((a,b)=>b.v-a.v);
   
   const tbody = $('#tblCluster tbody');
@@ -1032,7 +1105,8 @@ function renderCluster(){
 function showCidadesPorCluster(cluster) {
   selectedCluster = cluster;
   
-  const filteredData = RAW.filter(r => r.Cluster === cluster);
+  const dadosFiltrados = obterDadosFiltrados();
+  const filteredData = dadosFiltrados.filter(r => r.Cluster === cluster);
   
   const grp = {};
   filteredData.forEach(r => { grp[r.Cidade] = (grp[r.Cidade] || 0) + 1 });
@@ -1088,7 +1162,8 @@ function showCidadesPorCluster(cluster) {
 
 /* ================= Tipo de Fechamento ================= */
 function renderFechamento(){
-  const grp={}; RAW.forEach(r=>{grp[r.Tipo_Fechamento]=(grp[r.Tipo_Fechamento]||0)+1});
+  const dadosFiltrados = obterDadosFiltrados();
+  const grp={}; dadosFiltrados.forEach(r=>{grp[r.Tipo_Fechamento]=(grp[r.Tipo_Fechamento]||0)+1});
   const total=Object.values(grp).reduce((a,b)=>a+b,0)||1;
   const arr=Object.entries(grp).map(([t,v])=>({t,v})).sort((a,b)=>b.v-a.v);
   $('#tblFechamento tbody').innerHTML=arr.map(e=>`<tr class="slide-in-up">
@@ -1119,7 +1194,8 @@ function renderFechamento(){
 
 /* ================= Reincidência ================= */
 function renderReinc(){
-  const byNode = groupBy(RAW, 'Node');
+  const dadosFiltrados = obterDadosFiltrados();
+  const byNode = groupBy(dadosFiltrados, 'Node');
   const reinc = Object.entries(byNode)
     .filter(([_, list]) => list.length > 1)
     .map(([n, l]) => ({
@@ -1134,7 +1210,8 @@ function renderReinc(){
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
         cidade: x.Cidade || '',
-        incidente: x.INCIDENTE || ''
+        incidente: x.INCIDENTE || '',
+        tipoProblema: x.Tipo_Problema || '(não informado)'
       }))
     })).sort((a, b) => b.Count - a.Count);
 
@@ -1228,6 +1305,10 @@ function toggleDetalhesNode(tr, nodeData){
                       <span class="ms-2">${inc.solucao}</span>
                     </div>
                     <div class="mb-2">
+                      <strong class="text-dark">Tipo de Problema:</strong>
+                      <span class="ms-2 badge bg-info text-dark">${inc.tipoProblema}</span>
+                    </div>
+                    <div class="mb-2">
                       <strong class="text-dark">QOE:</strong>
                       <span class="ms-2">
                         <span class="${inc.qoePre > 80 ? 'text-success' : inc.qoePre > 60 ? 'text-warning' : 'text-danger'}">
@@ -1261,7 +1342,8 @@ function toggleDetalhesNode(tr, nodeData){
 
 /* ================= Dashboard ================= */
 function renderResumo(){
-  const byCluster=groupBy(RAW,'Cluster');
+  const dadosFiltrados = obterDadosFiltrados();
+  const byCluster=groupBy(dadosFiltrados,'Cluster');
   const wrap=$('#cardsResumo'); wrap.innerHTML='';
   Object.entries(byCluster).forEach(([cl,rows], index) => {
     const total=rows.length;
