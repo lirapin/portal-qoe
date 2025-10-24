@@ -763,23 +763,31 @@ let selectedCluster = null;
 let filtroProdutividade = 'todos';
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
-function classificarProdutividade(tipoFechamento) {
-  const tipo = String(tipoFechamento || '').toUpperCase().trim();
+function classificarProdutividade(solucao) {
+  const solucaoStr = String(solucao || '').toLowerCase().trim();
   
-  // Tipos considerados improdutivos
-  const tiposImprodutivos = [
-    'N. SEM INTERVENÇÃO; N. DURANTE A IDENTIFICAÇÃO E CLEARDATE',
-    'N. SEM INTERVENCAO; N. DURANTE A IDENTIFICACAO E CLEARDATE'
+  // Verificar se a solução contém algum dos termos improdutivos
+  const termosImprodutivos = [
+    'n. s intervenção',
+    'n. s intervencao', 
+    'n. durante a identificação',
+    'n. durante a identificacao',
+    'cleardate'
   ];
   
-  return tiposImprodutivos.includes(tipo) ? 'improdutivo' : 'produtivo';
+  // Verificar se algum termo improdutivo está presente na solução
+  const isImprodutivo = termosImprodutivos.some(termo => 
+    solucaoStr.includes(termo)
+  );
+  
+  return isImprodutivo ? 'improdutivo' : 'produtivo';
 }
 
 function calcularPercentuaisProdutividade(dados) {
   const total = dados.length;
   if (total === 0) return { produtivo: 0, improdutivo: 0 };
   
-  const produtivo = dados.filter(row => classificarProdutividade(row.Tipo_Fechamento) === 'produtivo').length;
+  const produtivo = dados.filter(row => classificarProdutividade(row.SOLUÇÃO) === 'produtivo').length;
   const improdutivo = total - produtivo;
   
   return {
@@ -803,7 +811,7 @@ function atualizarPercentuais() {
 function obterDadosFiltrados() {
   if (filtroProdutividade === 'todos') return RAW;
   
-  return RAW.filter(row => classificarProdutividade(row.Tipo_Fechamento) === filtroProdutividade);
+  return RAW.filter(row => classificarProdutividade(row.SOLUÇÃO) === filtroProdutividade);
 }
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
@@ -833,11 +841,11 @@ const AUTO_MAP={
   'QOE_24H':'QOE_24h',
   'QOE24H':'QOE_24h',
   'QOE 24H PÓS':'QOE_24h',
-  'SOLUÇÃO':'Tipo_Fechamento',
-  'SOLUCAO':'Tipo_Fechamento',
-  'TIPO_FECHAMENTO':'Tipo_Fechamento',
-  'TIPO SOLUCAO':'Tipo_Fechamento',
-  'TIPO SOLUÇÃO':'Tipo_Fechamento'
+  'SOLUÇÃO':'SOLUÇÃO',
+  'SOLUCAO':'SOLUÇÃO',
+  'TIPO_FECHAMENTO':'SOLUÇÃO',
+  'TIPO SOLUCAO':'SOLUÇÃO',
+  'TIPO SOLUÇÃO':'SOLUÇÃO'
 };
 
 function normalizeHeader(str) {
@@ -994,7 +1002,7 @@ function handleFile(file){
           }
         });
         
-        ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
+        ['Cluster','Node','Cidade','SOLUÇÃO','INCIDENTE'].forEach(k=>{
           o[k] = String(o[k] || '').trim();
           if(o[k]==='') o[k]='(não informado)';
         });
@@ -1202,7 +1210,7 @@ function showCidadesPorCluster(cluster) {
 /* ================= Tipo de Fechamento ================= */
 function renderFechamento(){
   const dadosFiltrados = obterDadosFiltrados();
-  const grp={}; dadosFiltrados.forEach(r=>{grp[r.Tipo_Fechamento]=(grp[r.Tipo_Fechamento]||0)+1});
+  const grp={}; dadosFiltrados.forEach(r=>{grp[r.SOLUÇÃO]=(grp[r.SOLUÇÃO]||0)+1});
   const total=Object.values(grp).reduce((a,b)=>a+b,0)||1;
   const arr=Object.entries(grp).map(([t,v])=>({t,v})).sort((a,b)=>b.v-a.v);
   $('#tblFechamento tbody').innerHTML=arr.map(e=>`<tr class="slide-in-up">
@@ -1243,7 +1251,7 @@ function renderReinc(){
       Cidade: l[0].Cidade, 
       Count: l.length,
       Incidents: l.map(x => ({
-        solucao: x.Tipo_Fechamento || '(sem solução)',
+        solucao: x.SOLUÇÃO || '(sem solução)',
         data: x.Data ? formatarData(x.Data) : '(sem data)',
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
