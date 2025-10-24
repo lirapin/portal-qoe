@@ -443,23 +443,6 @@
       font-weight: 500;
     }
 
-    /* Indicador de dados carregados */
-    .data-indicator {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 8px 16px;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(10px);
-      z-index: 100;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
     /* Cabeçalhos ordenáveis */
     .sortable-header {
       cursor: pointer;
@@ -521,6 +504,24 @@
       margin-right: 5px;
     }
 
+    /* Botão de atualizar discreto */
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      margin-right: 10px;
+    }
+
+    .btn-refresh:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: rotate(180deg);
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         min-height: auto;
@@ -546,14 +547,12 @@
         border-radius: 8px;
       }
 
-      .data-indicator {
-        position: relative;
-        top: auto;
-        right: auto;
-        margin: 10px 0;
+      .incident-counter {
+        margin-right: 5px;
+        margin-bottom: 10px;
       }
 
-      .incident-counter {
+      .btn-refresh {
         margin-right: 5px;
         margin-bottom: 10px;
       }
@@ -566,12 +565,6 @@
     <h1 class="h4 m-0 fw-bold"><span class="brand-dot"></span>Portal de Análise de Incidentes</h1>
   </div>
 </header>
-
-<!-- Indicador de dados carregados -->
-<div id="dataIndicator" class="data-indicator" style="display: none;">
-  <i class="bi bi-database me-2"></i>
-  <span id="dataCount">0</span> incidentes carregados
-</div>
 
 <div class="container-fluid">
   <div class="row">
@@ -615,6 +608,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Incidentes por Cluster</h5>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterCluster">
                 <i class="bi bi-database"></i>
                 <span id="countCluster">0</span> incidentes
@@ -658,6 +654,9 @@
               <h5 class="m-0 section-title" id="tituloCidade">Incidentes por Cidade</h5>
             </div>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterCidade">
                 <i class="bi bi-database"></i>
                 <span id="countCidade">0</span> incidentes
@@ -696,6 +695,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">QOE Pré vs Pós</h5>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterQOE">
                 <i class="bi bi-database"></i>
                 <span id="countQOE">0</span> incidentes
@@ -764,6 +766,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Tipo de Fechamento</h5>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterFechamento">
                 <i class="bi bi-database"></i>
                 <span id="countFechamento">0</span> incidentes
@@ -834,6 +839,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Log de Reincidência</h5>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterReinc">
                 <i class="bi bi-database"></i>
                 <span id="countReinc">0</span> incidentes
@@ -865,6 +873,9 @@
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="m-0 section-title">Dashboard Resumo</h5>
             <div class="d-flex align-items-center">
+              <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
               <span class="incident-counter" id="counterResumo">
                 <i class="bi bi-database"></i>
                 <span id="countResumo">0</span> incidentes
@@ -1123,19 +1134,6 @@ function updateSortIndicators(columnName, direction) {
   currentSort = { column: columnName, direction };
 }
 
-/* ================= Atualizar Indicador de Dados ================= */
-function updateDataIndicator() {
-  const indicator = $('#dataIndicator');
-  const countElement = $('#dataCount');
-  
-  if (RAW.length > 0) {
-    countElement.textContent = RAW.length.toLocaleString('pt-BR');
-    indicator.style.display = 'block';
-  } else {
-    indicator.style.display = 'none';
-  }
-}
-
 /* ================= Mapeamento flexível de cabeçalhos ================= */
 const AUTO_MAP={
   'INCIDENTE':'INCIDENTE',
@@ -1350,9 +1348,6 @@ function handleFile(file){
       }
 
       DATA_ALL=rows; RAW=[...rows];
-      
-      // Atualizar indicador de dados carregados
-      updateDataIndicator();
       
       // Atualizar contadores
       updateCounters();
