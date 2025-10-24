@@ -620,6 +620,37 @@
               <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
             </button>
           </div>
+          
+          <!-- Filtro de Produtividade -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card-custom p-3">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Filtrar por Produtividade:</label>
+                    <select class="form-select" id="filtroProdutividade">
+                      <option value="todos">Todos os Incidentes</option>
+                      <option value="produtivo">Apenas Produtivos</option>
+                      <option value="improdutivo">Apenas Improdutivos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                      <div class="text-center me-4">
+                        <div class="fw-bold text-success fs-5" id="percentualProdutivo">0%</div>
+                        <small class="text-muted">Produtivo</small>
+                      </div>
+                      <div class="text-center">
+                        <div class="fw-bold text-danger fs-5" id="percentualImprodutivo">0%</div>
+                        <small class="text-muted">Improdutivo</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div class="row">
             <div class="col-12 col-lg-6 mb-4">
               <div class="chart-wrap">
@@ -678,6 +709,37 @@
               <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
             </button>
           </div>
+          
+          <!-- Filtro de Produtividade no Dashboard -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card-custom p-3">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Filtrar por Produtividade:</label>
+                    <select class="form-select" id="filtroProdutividadeDashboard">
+                      <option value="todos">Todos os Incidentes</option>
+                      <option value="produtivo">Apenas Produtivos</option>
+                      <option value="improdutivo">Apenas Improdutivos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                      <div class="text-center me-4">
+                        <div class="fw-bold text-success fs-5" id="percentualProdutivoDashboard">0%</div>
+                        <small class="text-muted">Produtivo</small>
+                      </div>
+                      <div class="text-center">
+                        <div class="fw-bold text-danger fs-5" id="percentualImprodutivoDashboard">0%</div>
+                        <small class="text-muted">Improdutivo</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div id="cardsResumo" class="row g-4"></div>
         </section>
       </div>
@@ -698,7 +760,51 @@ const $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
 const $=(s,c=document)=>c.querySelector(s);
 let DATA_ALL=[], RAW=[], charts={};
 let selectedCluster = null;
-let filtroTipoProblema = null;
+let filtroProdutividade = 'todos';
+
+/* ================= Classificação Produtivo/Improdutivo ================= */
+function classificarProdutividade(tipoFechamento) {
+  const tipo = String(tipoFechamento || '').toUpperCase().trim();
+  
+  // Tipos considerados improdutivos
+  const tiposImprodutivos = [
+    'N. SEM INTERVENÇÃO; N. DURANTE A IDENTIFICAÇÃO E CLEARDATE',
+    'N. SEM INTERVENCAO; N. DURANTE A IDENTIFICACAO E CLEARDATE'
+  ];
+  
+  return tiposImprodutivos.includes(tipo) ? 'improdutivo' : 'produtivo';
+}
+
+function calcularPercentuaisProdutividade(dados) {
+  const total = dados.length;
+  if (total === 0) return { produtivo: 0, improdutivo: 0 };
+  
+  const produtivo = dados.filter(row => classificarProdutividade(row.Tipo_Fechamento) === 'produtivo').length;
+  const improdutivo = total - produtivo;
+  
+  return {
+    produtivo: (produtivo / total * 100).toFixed(1),
+    improdutivo: (improdutivo / total * 100).toFixed(1)
+  };
+}
+
+function atualizarPercentuais() {
+  const percentuais = calcularPercentuaisProdutividade(RAW);
+  
+  // Atualizar na aba Fechamento
+  $('#percentualProdutivo').textContent = `${percentuais.produtivo}%`;
+  $('#percentualImprodutivo').textContent = `${percentuais.improdutivo}%`;
+  
+  // Atualizar na aba Dashboard
+  $('#percentualProdutivoDashboard').textContent = `${percentuais.produtivo}%`;
+  $('#percentualImprodutivoDashboard').textContent = `${percentuais.improdutivo}%`;
+}
+
+function obterDadosFiltrados() {
+  if (filtroProdutividade === 'todos') return RAW;
+  
+  return RAW.filter(row => classificarProdutividade(row.Tipo_Fechamento) === filtroProdutividade);
+}
 
 /* ================= Mapeamento flexível de cabeçalhos ================= */
 const AUTO_MAP={
@@ -731,11 +837,7 @@ const AUTO_MAP={
   'SOLUCAO':'Tipo_Fechamento',
   'TIPO_FECHAMENTO':'Tipo_Fechamento',
   'TIPO SOLUCAO':'Tipo_Fechamento',
-  'TIPO SOLUÇÃO':'Tipo_Fechamento',
-  'TIPO DE PROBLEMA':'Tipo_Problema',
-  'TIPO PROBLEMA':'Tipo_Problema',
-  'PROBLEMA':'Tipo_Problema',
-  'CATEGORIA PROBLEMA':'Tipo_Problema'
+  'TIPO SOLUÇÃO':'Tipo_Fechamento'
 };
 
 function normalizeHeader(str) {
@@ -892,7 +994,7 @@ function handleFile(file){
           }
         });
         
-        ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE','Tipo_Problema'].forEach(k=>{
+        ['Cluster','Node','Cidade','Tipo_Fechamento','INCIDENTE'].forEach(k=>{
           o[k] = String(o[k] || '').trim();
           if(o[k]==='') o[k]='(não informado)';
         });
@@ -913,8 +1015,8 @@ function handleFile(file){
 
       DATA_ALL=rows; RAW=[...rows];
       
-      // Atualizar filtro de Tipo de Problema
-      atualizarFiltroTipoProblema();
+      // Atualizar percentuais de produtividade
+      atualizarPercentuais();
       
       renderAll();
       showToast(`✅ ${rows.length} incidentes carregados com sucesso`, 'success');
@@ -924,69 +1026,6 @@ function handleFile(file){
     }
   };
   reader.readAsArrayBuffer(file);
-}
-
-/* ================= Filtro de Tipo de Problema ================= */
-function atualizarFiltroTipoProblema() {
-  // Verificar se a coluna Tipo_Problema existe nos dados
-  const tiposProblema = [...new Set(RAW.map(r => r.Tipo_Problema || '(não informado)'))].sort();
-  
-  // Criar ou atualizar o filtro na sidebar
-  let filtroContainer = $('#filtroTipoProblema');
-  if (!filtroContainer) {
-    filtroContainer = document.createElement('div');
-    filtroContainer.id = 'filtroTipoProblema';
-    filtroContainer.className = 'mb-4';
-    
-    const uploadDrop = $('#dropArea');
-    uploadDrop.parentNode.insertBefore(filtroContainer, uploadDrop.nextSibling);
-  }
-  
-  filtroContainer.innerHTML = `
-    <div class="mb-2">
-      <label class="form-label fw-semibold small text-muted mb-2">
-        <i class="bi bi-funnel me-1"></i>Filtrar por Tipo de Problema
-      </label>
-      <select class="form-select form-select-sm" id="selectTipoProblema">
-        <option value="">Todos os tipos</option>
-        ${tiposProblema.map(tipo => 
-          `<option value="${tipo}" ${filtroTipoProblema === tipo ? 'selected' : ''}>${tipo}</option>`
-        ).join('')}
-      </select>
-    </div>
-    ${filtroTipoProblema ? `
-      <div class="d-flex align-items-center justify-content-between bg-light rounded p-2 small">
-        <span class="text-muted">Filtro ativo:</span>
-        <span class="badge bg-primary">${filtroTipoProblema}</span>
-        <button class="btn btn-sm btn-outline-danger" id="btnLimparFiltro">
-          <i class="bi bi-x"></i>
-        </button>
-      </div>
-    ` : ''}
-  `;
-  
-  // Adicionar event listeners
-  $('#selectTipoProblema').addEventListener('change', function() {
-    filtroTipoProblema = this.value || null;
-    atualizarFiltroTipoProblema();
-    renderAll();
-  });
-  
-  const btnLimpar = $('#btnLimparFiltro');
-  if (btnLimpar) {
-    btnLimpar.addEventListener('click', function() {
-      filtroTipoProblema = null;
-      $('#selectTipoProblema').value = '';
-      atualizarFiltroTipoProblema();
-      renderAll();
-    });
-  }
-}
-
-/* ================= Obter dados filtrados ================= */
-function obterDadosFiltrados() {
-  if (!filtroTipoProblema) return RAW;
-  return RAW.filter(r => r.Tipo_Problema === filtroTipoProblema);
 }
 
 /* ================= QOE - COM MELHORIA E STATUS ================= */
@@ -1210,8 +1249,7 @@ function renderReinc(){
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
         cidade: x.Cidade || '',
-        incidente: x.INCIDENTE || '',
-        tipoProblema: x.Tipo_Problema || '(não informado)'
+        incidente: x.INCIDENTE || ''
       }))
     })).sort((a, b) => b.Count - a.Count);
 
@@ -1303,10 +1341,6 @@ function toggleDetalhesNode(tr, nodeData){
                     <div class="mb-2">
                       <strong class="text-dark">Solução:</strong>
                       <span class="ms-2">${inc.solucao}</span>
-                    </div>
-                    <div class="mb-2">
-                      <strong class="text-dark">Tipo de Problema:</strong>
-                      <span class="ms-2 badge bg-info text-dark">${inc.tipoProblema}</span>
                     </div>
                     <div class="mb-2">
                       <strong class="text-dark">QOE:</strong>
@@ -1634,6 +1668,17 @@ function renderAll(){
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btnVoltarCluster').style.display = 'none';
+  
+  // Event listeners para filtros de produtividade
+  $('#filtroProdutividade').addEventListener('change', function() {
+    filtroProdutividade = this.value;
+    renderAll();
+  });
+  
+  $('#filtroProdutividadeDashboard').addEventListener('change', function() {
+    filtroProdutividade = this.value;
+    renderAll();
+  });
   
   document.getElementById('btnVoltarCluster').addEventListener('click', function() {
     selectedCluster = null;
