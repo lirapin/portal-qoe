@@ -566,6 +566,8 @@
   </div>
 </header>
 
+<!-- INDICADOR FLUTUANTE REMOVIDO -->
+
 <div class="container-fluid">
   <div class="row">
     <!-- ===== SIDEBAR ===== -->
@@ -611,7 +613,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterCluster">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countCluster">0</span> incidentes
               </span>
@@ -657,7 +659,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterCidade">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countCidade">0</span> incidentes
               </span>
@@ -698,7 +700,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterQOE">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countQOE">0</span> incidentes
               </span>
@@ -769,7 +771,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterFechamento">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countFechamento">0</span> incidentes
               </span>
@@ -842,7 +844,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterReinc">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countReinc">0</span> incidentes
               </span>
@@ -876,7 +878,7 @@
               <button class="btn-refresh" title="Atualizar página" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
-              <span class="incident-counter" id="counterResumo">
+              <span class="incident-counter">
                 <i class="bi bi-database"></i>
                 <span id="countResumo">0</span> incidentes
               </span>
@@ -943,7 +945,6 @@ let currentSort = { column: null, direction: 'asc' };
 /* ================= Atualizar Contadores ================= */
 function updateCounters() {
   const total = RAW.length;
-  const dadosFiltrados = obterDadosFiltrados();
   const dadosFiltradosQOE = obterDadosFiltradosQOE();
   
   // Atualizar todos os contadores
