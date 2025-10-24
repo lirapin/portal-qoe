@@ -613,7 +613,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countCluster">0</span> incidentes
+                <span id="countCluster">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFCluster">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -659,7 +659,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countCidade">0</span> incidentes
+                <span id="countCidade">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFCidade">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -700,7 +700,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countQOE">0</span> incidentes
+                <span id="countQOE">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFQOE">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -771,7 +771,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countFechamento">0</span> incidentes
+                <span id="countFechamento">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFFechamento">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -844,7 +844,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countReinc">0</span> incidentes
+                <span id="countReinc">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFReinc">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -878,7 +878,7 @@
               </button>
               <span class="incident-counter">
                 <i class="bi bi-database"></i>
-                <span id="countResumo">0</span> incidentes
+                <span id="countResumo">0</span>
               </span>
               <button class="btn btn-primary btn-sm" id="btnPDFResumo">
                 <i class="bi bi-filetype-pdf me-1"></i> Exportar PDF
@@ -945,13 +945,13 @@ function updateCounters() {
   const total = RAW.length;
   const dadosFiltradosQOE = obterDadosFiltradosQOE();
   
-  // Atualizar todos os contadores - AGORA COM ESPAÇO
+  // CORREÇÃO: REMOVER "INCIDENTES" DO JAVASCRIPT - APENAS NÚMERO
   $$('.incident-counter span').forEach(span => {
-    span.textContent = total.toLocaleString('pt-BR') + ' incidentes';
+    span.textContent = total.toLocaleString('pt-BR');
   });
   
   // Contador específico para QOE (com filtros aplicados)
-  $('#countQOE').textContent = dadosFiltradosQOE.length.toLocaleString('pt-BR') + ' incidentes';
+  $('#countQOE').textContent = dadosFiltradosQOE.length.toLocaleString('pt-BR');
 }
 
 /* ================= Classificação Produtivo/Improdutivo ================= */
@@ -1595,7 +1595,8 @@ function renderReinc(){
       Count: l.length,
       Incidents: l.map(x => ({
         solucao: x.SOLUÇÃO || '(SEM SOLUÇÃO)',
-        data: x.HI_INICIO ? formatarData(x.HI_INICIO) : '(SEM DATA)', // USANDO HI_INICIO AGORA
+        // CORREÇÃO: USAR HI_INICIO CORRETAMENTE PARA DATAS
+        data: x.HI_INICIO ? formatarData(x.HI_INICIO) : '(SEM DATA)',
         qoePre: x.QOE_Pre || 0,
         qoePos: x.QOE_Pos || 0,
         cluster: x.Cluster || '',
